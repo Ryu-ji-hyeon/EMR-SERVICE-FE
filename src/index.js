@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import Modal from "react-modal";
 import App from "./App";
 
+
 Modal.setAppElement("#root");
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
