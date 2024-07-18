@@ -3,6 +3,7 @@ import { useSpeechSynthesis } from 'react-speech-kit';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import axios from 'axios';
 
+// 음성 인식 예약 시스템 
 function App() {
   const [text, setText] = useState('');
   const { speak, cancel } = useSpeechSynthesis();
