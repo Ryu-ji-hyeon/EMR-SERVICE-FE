@@ -6,10 +6,10 @@ import Header from './components/Header';
 import Home from './Main/Home';
 import LoginForm from './Main/LoginForm';
 import SignupForm from './Main/SignupForm';
-import DoctorSignup from './Doctor/DoctorSignup'; // 추가
+import DoctorSignup from './Doctor/DoctorSignup'; 
+import MemberSignup from './Member/MemberSignup'; 
 import Footer from './components/Footer';
 import VoiceReservationSystem from './Voice/VoiceReservationSystem';
-import './style.css';
 
 function App() {
   return (
@@ -19,7 +19,8 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/home/loginForm" element={<LoginForm />} />
             <Route path="/home/choiceMember" element={<SignupForm />} />
-            <Route path="/doctor/signup" element={<DoctorSignup />} /> {/* 추가 */}
+            <Route path="/doctor/signup" element={<DoctorSignup />} /> 
+            <Route path="/Member/signup" element={<MemberSignup />} /> 
             <Route path="/home/logout" element={
               <PrivateRoute>
                 <Home />
