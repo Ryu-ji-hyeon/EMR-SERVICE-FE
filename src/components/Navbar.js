@@ -2,8 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const Navbar = () => {
-  const { isAuthenticated, logout } = useAuth();
+const NavBar = () => {
+  const { user } = useAuth();
+  const role = user?.role;
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -13,19 +14,44 @@ const Navbar = () => {
       </button>
       <div className="collapse navbar-collapse" id="navbarNav">
         <ul className="navbar-nav ml-auto">
-          {!isAuthenticated && (
+          {role === 'DOCTOR' && (
             <>
               <li className="nav-item">
-                <Link className="nav-link" to="/home/loginForm">로그인</Link>
+                <Link className="nav-link" to="/appointments/doctor">진료 확인</Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="/home/choiceMember">회원가입</Link>
+                <Link className="nav-link" to="/doctor/updatePassword">개인정보 수정</Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/doctor/delete">회원 탈퇴</Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/logout">로그아웃</Link>
               </li>
             </>
           )}
-          {isAuthenticated && (
+          {role === 'MEMBER' && (
+            <>
+              <li className="nav-item">
+                <Link className="nav-link" to="/member/book">진료 예약</Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/appointments/my">진료 확인</Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/member/delete">회원 탈퇴</Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/member/updatePassword">개인정보 수정</Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/logout">로그아웃</Link>
+              </li>
+            </>
+          )}
+          {role === 'ADMIN' && (
             <li className="nav-item">
-              <button className="nav-link btn btn-link" onClick={logout}>로그아웃</button>
+              <Link className="nav-link" to="/appointments/check">진료 확인</Link>
             </li>
           )}
         </ul>
@@ -34,4 +60,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default NavBar;

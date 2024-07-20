@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import '../css/style.css';
 
 const PatientRegistrationForm = () => {
@@ -13,6 +14,7 @@ const PatientRegistrationForm = () => {
         height: '',
         bloodType: ''
     });
+    const navigate = useNavigate();
     const [csrfToken, setCsrfToken] = useState('');
 
     useEffect(() => {
@@ -55,11 +57,12 @@ const PatientRegistrationForm = () => {
         })
             .then(response => {
                 console.log('회원가입 성공:', response.data);
-                // 성공 시 처리
+                alert('회원가입이 성공적으로 완료되었습니다.');
+                navigate('/home/loginForm');
             })
             .catch(error => {
                 console.error('회원가입 실패:', error);
-                // 실패 시 처리
+                alert('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
             });
     };
 

@@ -1,12 +1,11 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client'; // 수정된 부분
+import { createRoot } from 'react-dom/client'; // React 18 사용
 import { BrowserRouter } from 'react-router-dom';
-import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 const container = document.getElementById('root');
-const root = createRoot(container); // 수정된 부분
+const root = createRoot(container); // React 18 사용
 
 root.render(
   <React.StrictMode>
