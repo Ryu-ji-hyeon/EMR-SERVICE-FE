@@ -8,13 +8,19 @@ const VoiceReservationSystem = () => {
   const { speak, cancel } = useSpeechSynthesis();
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
   const [currentStep, setCurrentStep] = useState(0);
-  const [userAnswers, setUserAnswers] = useState([]);
   const [previousResponse, setPreviousResponse] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
+  const [csrfToken, setCsrfToken] = useState('');
 
   useEffect(() => {
+    // CSRF 토큰을 서버에서 가져옵니다.
+    axios.get('http://localhost:8080/api/csrf-token', { withCredentials: true })
+      .then(response => setCsrfToken(response.data.token))
+      .catch(error => console.error('Error fetching CSRF token:', error));
+
     askDateQuestion();
+    handleStartListening(); // 컴포넌트 마운트 시 음성 인식 시작
   }, []);
 
   useEffect(() => {
@@ -71,16 +77,22 @@ const VoiceReservationSystem = () => {
     const newResponse = response.replace(previousResponse, '').trim();
     setPreviousResponse(response);
 
+    console.log('User Response:', newResponse); // 추가된 로그
     axios.post('http://localhost:8080/api/log', { transcript: newResponse })
       .then(() => console.log('Transcript logged successfully'))
       .catch((error) => console.error('Error logging transcript:', error));
 
+    handleStopListening(); // 음성 인식 중지
+
     if (currentStep === 0) {
-      setDate(parseDate(newResponse));
+      const parsedDate = parseDate(newResponse);
+      console.log('Parsed Date:', parsedDate); // 추가된 로그
+      setDate(parsedDate);
       askTimeQuestion();
       setCurrentStep(1);
     } else if (currentStep === 1) {
       const parsedTime = parseTime(newResponse);
+      console.log('Parsed Time:', parsedTime); // 추가된 로그
       if (parsedTime) {
         setTime(parsedTime);
         checkAvailability(date, parsedTime);
@@ -115,26 +127,46 @@ const VoiceReservationSystem = () => {
   };
 
   const checkAvailability = (date, time) => {
-    axios.get(`http://localhost:8080/api/check?date=${date}&time=${time}`)
+    const token = localStorage.getItem('accessToken');
+    console.log(`Checking availability for date: ${date}, time: ${time}`);
+    axios.get(`http://localhost:8080/api/check?date=${date}&time=${time}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      withCredentials: true
+    })
       .then((response) => {
+        console.log('Availability response:', response.data);
         if (response.data.available) {
           makeReservation(date, time);
         } else {
           speakQuestion('이미 예약이 있습니다. 다른 시간을 선택해주세요.');
           setText('이미 예약이 있습니다. 다른 시간을 선택해주세요.');
           setCurrentStep(1);
+          handleStartListening(); // 음성 인식 재개
         }
       })
       .catch((error) => {
         console.error('Error checking availability:', error);
         speakQuestion('예약 확인 중 오류가 발생했습니다. 다시 시도해주세요.');
         setText('예약 확인 중 오류가 발생했습니다. 다시 시도해주세요.');
+        handleStartListening(); // 음성 인식 재개
       });
   };
 
   const makeReservation = (date, time) => {
-    axios.post(`http://localhost:8080/api/reserve`, null, { params: { date, time } })
+    const token = localStorage.getItem('accessToken');
+    console.log(`Making reservation for date: ${date}, time: ${time}`);
+    axios.post(`http://localhost:8080/api/reserve`, null, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'X-XSRF-TOKEN': csrfToken
+      },
+      params: { date, time },
+      withCredentials: true
+    })
       .then((response) => {
+        console.log('Reservation response:', response.data);
         speakQuestion('예약이 확정되었습니다.');
         setText('예약이 확정되었습니다.');
         setCurrentStep(3);

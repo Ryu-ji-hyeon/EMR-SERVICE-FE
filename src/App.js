@@ -11,10 +11,12 @@ import Footer from './components/Footer';
 import VoiceReservationSystem from './Voice/VoiceReservationSystem';
 import MemberDashboard from './Member/MemberDashboard';
 import DoctorDashboard from './Doctor/DoctorDashboard';
+import NavBar from './components/NavBar';
 
 function App() {
   return (
     <AuthProvider>
+      <NavBar />
       <div className="main-content">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -32,14 +34,14 @@ function App() {
               <DoctorDashboard />
             </PrivateRoute>
           } />
+          <Route path="/Voice/VoiceReservationSystem" element={
+            <PrivateRoute>
+              <VoiceReservationSystem />
+            </PrivateRoute>
+          } />
           <Route path="/logout" element={
             <PrivateRoute>
               <Home />
-            </PrivateRoute>
-          } />
-          <Route path="/voice/reservation" element={
-            <PrivateRoute>
-              <VoiceReservationSystem />
             </PrivateRoute>
           } />
         </Routes>
