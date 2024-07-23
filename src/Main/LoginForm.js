@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 
 const LoginForm = () => {
@@ -8,14 +9,15 @@ const LoginForm = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [csrfToken, setCsrfToken] = useState('');
   const navigate = useNavigate();
+  const { handleLogin } = useAuth();
 
   useEffect(() => {
     const apiServer = process.env.REACT_APP_API_SERVER;
 
     // CSRF 토큰을 서버에서 가져옵니다.
     axios.get(`${apiServer}/api/csrf-token`, { withCredentials: true })
-        .then(response => setCsrfToken(response.data.token))
-        .catch(error => console.error('Error fetching CSRF token:', error));
+      .then(response => setCsrfToken(response.data.token))
+      .catch(error => console.error('Error fetching CSRF token:', error));
   }, []);
 
   const handleChange = (e) => {
@@ -29,6 +31,7 @@ const LoginForm = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setErrorMessage(''); // Reset error message before new attempt
 
     const apiServer = process.env.REACT_APP_API_SERVER;
     try {
@@ -49,36 +52,31 @@ const LoginForm = () => {
         };
       }
 
-      console.log('Login Data:', loginData);
-      console.log('XSRF Token:', csrfToken);
-
-      axios.post(`${apiServer}${endpoint}`, loginData, {
+      const response = await axios.post(`${apiServer}${endpoint}`, loginData, {
         headers: {
-            'X-XSRF-TOKEN': csrfToken
+          'X-XSRF-TOKEN': csrfToken
         },
         withCredentials: true
-      })
-      .then(response => {
-        console.log('로그인 성공:', response.data);
-        alert('로그인이 성공적으로 완료되었습니다.');
-        localStorage.setItem('accessToken', response.data.token); // 토큰 저장
-
-            // 사용자 역할에 따라 다른 대시보드로 리디렉션
-          if (response.data.role === 'MEMBER') {
-            navigate('/member/dashboard');
-        } else if (response.data.role === 'DOCTOR') {
-            navigate('/doctor/dashboard');
-        } else {
-            console.error('알 수 없는 사용자 역할:', response.data.role);
-        }
-      })
-      .catch(error => {
-        console.error('로그인 실패:', error);
-        alert('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
       });
-    } catch (error) {
-      console.error('Unexpected Error:', error);
-    }
+
+      console.log('로그인 성공:', response.data);
+      alert('로그인이 성공적으로 완료되었습니다.');
+      localStorage.setItem('accessToken', response.data.token); // 토큰 저장
+
+      // 사용자 역할에 따라 다른 대시보드로 리디렉션
+      await handleLogin(credentials.username, credentials.password, loginType); // AuthContext에 사용자 정보 저장
+
+        if (response.data.role === 'MEMBER') {
+          navigate('/member/dashboard');
+        } else if (response.data.role === 'DOCTOR') {
+          navigate('/doctor/dashboard');
+        } else {
+          console.error('알 수 없는 사용자 역할:', response.data.role);
+        }
+        } catch (error) {
+        console.error('로그인 실패:', error);
+        setErrorMessage('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
+        }
   };
 
   return (

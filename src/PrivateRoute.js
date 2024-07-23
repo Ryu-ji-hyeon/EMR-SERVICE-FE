@@ -1,10 +1,11 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
 
 const PrivateRoute = ({ children }) => {
-  const isAuthenticated = !!localStorage.getItem('accessToken'); // 또는 다른 인증 상태 확인 로직
+  const { user } = useAuth();
 
-  return isAuthenticated ? children : <Navigate to="/login" />;
+  return user ? children : <Navigate to="/home/loginForm" />;
 };
 
 export default PrivateRoute;

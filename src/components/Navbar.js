@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const NavBar = () => {
-  const { user } = useAuth();
-  const role = user?.role;
+  const { user } = useAuth(); // AuthContext에서 사용자 정보 가져오기
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -14,44 +13,9 @@ const NavBar = () => {
       </button>
       <div className="collapse navbar-collapse" id="navbarNav">
         <ul className="navbar-nav ml-auto">
-          {role === 'DOCTOR' && (
-            <>
-              <li className="nav-item">
-                <Link className="nav-link" to="/appointments/doctor">진료 확인</Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/doctor/updatePassword">개인정보 수정</Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/doctor/delete">회원 탈퇴</Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/logout">로그아웃</Link>
-              </li>
-            </>
-          )}
-          {role === 'MEMBER' && (
-            <>
-              <li className="nav-item">
-                <Link className="nav-link" to="/member/book">진료 예약</Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/appointments/my">진료 확인</Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/member/delete">회원 탈퇴</Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/member/updatePassword">개인정보 수정</Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/logout">로그아웃</Link>
-              </li>
-            </>
-          )}
-          {role === 'ADMIN' && (
+          {user && ( // 사용자가 로그인된 경우에만 버튼을 표시
             <li className="nav-item">
-              <Link className="nav-link" to="/appointments/check">진료 확인</Link>
+              <Link className="nav-link" to="/Voice/VoiceReservationSystem">예약하기</Link>
             </li>
           )}
         </ul>
