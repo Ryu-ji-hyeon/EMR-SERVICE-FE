@@ -1,7 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client'; // React 18 사용
 import { BrowserRouter } from 'react-router-dom';
-import Modal from "react-modal";
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 

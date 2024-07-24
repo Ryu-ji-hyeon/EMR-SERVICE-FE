@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './Home.css'; // 스타일 파일 추가
 
+
 const Home = () => (
   <div className="container-fluid bg-color text-center text-white">
     <div className="overlay"></div>

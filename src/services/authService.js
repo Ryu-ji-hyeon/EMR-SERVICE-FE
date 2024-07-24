@@ -4,8 +4,8 @@ import axios from 'axios';
 // 로그인 API 호출
 export const login = async (loginId, password, role) => {
   try {
-    const apiServer = process.env.REACT_APP_API_SERVER;
-    const endpoint = role === 'DOCTOR' ? `${apiServer}/api/doctor/login` : `${apiServer}/api/member/login`;
+    
+    const endpoint = role === 'DOCTOR' ? `http://localhost:8080/api/doctor/login` : `http://localhost:8080/api/member/login`;
     const response = await axios.post(endpoint, { loginId, password });
     return response.data; // API에서 반환하는 데이터를 그대로 반환 (토큰, 역할 등)
   } catch (error) {
