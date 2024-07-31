@@ -15,7 +15,7 @@ const LoginForm = () => {
   useEffect(() => {
 
     // CSRF 토큰을 서버에서 가져옵니다.
-    axios.get(`http://localhost:8080/api/csrf-token`, { withCredentials: true })
+    axios.get(`${process.env.REACT_APP_API_SERVER}/api/csrf-token`, { withCredentials: true })
       .then(response => setCsrfToken(response.data.token))
       .catch(error => console.error('Error fetching CSRF token:', error));
   }, []);
@@ -51,7 +51,7 @@ const LoginForm = () => {
         };
       }
 
-      const response = await axios.post(`http://localhost:8080${endpoint}`, loginData, {
+      const response = await axios.post(`${process.env.REACT_APP_API_SERVER}${endpoint}`, loginData, {
         headers: {
           'X-XSRF-TOKEN': csrfToken
         },
@@ -66,9 +66,9 @@ const LoginForm = () => {
       await handleLogin(credentials.username, credentials.password, loginType); // AuthContext에 사용자 정보 저장
 
         if (response.data.role === 'MEMBER') {
-          navigate('http://localhost:8080/member/dashboard');
+          navigate(`${process.env.REACT_APP_API_SERVER}/member/dashboard`);
         } else if (response.data.role === 'DOCTOR') {
-          navigate('http://localhost:8080/doctor/dashboard');
+          navigate(`${process.env.REACT_APP_API_SERVER}/doctor/dashboard`);
         } else {
           console.error('알 수 없는 사용자 역할:', response.data.role);
         }

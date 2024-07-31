@@ -18,10 +18,9 @@ const PatientRegistrationForm = () => {
     const [csrfToken, setCsrfToken] = useState('');
 
     useEffect(() => {
-        const apiServer = process.env.REACT_APP_API_SERVER;
-
+    
         // CSRF 토큰을 서버에서 가져옵니다.
-        axios.get(`${apiServer}/api/csrf-token`, { withCredentials: true })
+        axios.get(`${process.env.REACT_APP_API_SERVER}/api/csrf-token`, { withCredentials: true })
             .then(response => setCsrfToken(response.data.token))
             .catch(error => console.error('Error fetching CSRF token:', error));
     }, []);
@@ -48,8 +47,7 @@ const PatientRegistrationForm = () => {
         };
         const registrationDto = {}; // 필요한 경우 추가 필드 설정
 
-        const apiServer = process.env.REACT_APP_API_SERVER;
-        axios.post(`${apiServer}/api/member/signup`, { memberDto, registrationDto }, {
+        axios.post(`${process.env.REACT_APP_API_SERVER}/api/member/signup`, { memberDto, registrationDto }, {
             headers: {
                 'X-XSRF-TOKEN': csrfToken
             },

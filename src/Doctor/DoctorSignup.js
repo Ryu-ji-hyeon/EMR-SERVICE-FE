@@ -15,15 +15,14 @@ const DoctorSignup = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const apiServer = process.env.REACT_APP_API_SERVER;
 
     // 부서 목록을 서버에서 가져옵니다.
-    axios.get(`${apiServer}/api/doctor/departments`, { withCredentials: true })
+    axios.get(`${process.env.REACT_APP_API_SERVER}/api/doctor/departments`, { withCredentials: true })
       .then(response => setDepts(response.data))
       .catch(error => console.error('Error fetching departments:', error));
 
     // CSRF 토큰을 서버에서 가져옵니다.
-    axios.get(`${apiServer}/api/csrf-token`, { withCredentials: true })
+    axios.get(`${process.env.REACT_APP_API_SERVER}/api/csrf-token`, { withCredentials: true })
       .then(response => setCsrfToken(response.data.token))
       .catch(error => console.error('Error fetching CSRF token:', error));
   }, []);
@@ -38,9 +37,8 @@ const DoctorSignup = () => {
   };
 
   const handleSubmit = (e) => {
-    const apiServer = process.env.REACT_APP_API_SERVER;
     e.preventDefault();
-    axios.post(`${apiServer}/api/doctor/signup`, formData, {
+    axios.post(`${process.env.REACT_APP_API_SERVER}/api/doctor/signup`, formData, {
       headers: {
         'X-XSRF-TOKEN': csrfToken
       },
