@@ -66,9 +66,9 @@ const LoginForm = () => {
       await handleLogin(credentials.username, credentials.password, loginType); // AuthContext에 사용자 정보 저장
 
         if (response.data.role === 'MEMBER') {
-          navigate(`${process.env.REACT_APP_API_SERVER}/member/dashboard`);
+          navigate(`/member/dashboard`);
         } else if (response.data.role === 'DOCTOR') {
-          navigate(`${process.env.REACT_APP_API_SERVER}/doctor/dashboard`);
+          navigate(`/doctor/dashboard`);
         } else {
           console.error('알 수 없는 사용자 역할:', response.data.role);
         }
