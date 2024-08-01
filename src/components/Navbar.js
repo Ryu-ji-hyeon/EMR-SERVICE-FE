@@ -27,7 +27,7 @@ const NavBar = () => {
               {user.role === 'MEMBER' && (
                 <>
                   <li className="nav-item">
-                    <Link className="nav-link" to="/Voice/DepartmentDoctorSelection">예약하기</Link>
+                    <Link className="nav-link" to="/reservation-choice">예약하기</Link>
                   </li>
                   <li className="nav-item">
                     <Link className="nav-link" to="/member/reservations">예약 확인</Link>

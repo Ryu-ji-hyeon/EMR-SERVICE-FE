@@ -8,12 +8,15 @@ import SignupForm from './Main/SignupForm';
 import DoctorSignup from './Doctor/DoctorSignup';
 import MemberSignup from './Member/MemberSignup';
 import Footer from './components/Footer';
-import DepartmentDoctorSelection from './Doctor/DepartmentDoctorSelection';
-import ReservationScreen from './Voice/ReservationScreen';
+import DepartmentDoctorSelection from './Department/DepartmentDoctorSelection';
+import ReservationScreen from './VoiceReservation/ReservationScreen';
 import MemberDashboard from './Member/MemberDashboard';
 import DoctorDashboard from './Doctor/DoctorDashboard';
 import NavBar from './components/NavBar';
-import ReservationHistory from './Voice/ReservationHistory'; 
+import ReservationHistory from './VoiceReservation/ReservationHistory'; 
+import ReservationChoice from './VoiceReservation/ReservationChoice'; 
+import StandardReservation from './StandardReservation/StandardReservation';
+import VoiceGuide from './VoiceReservation/VoiceGuide';
 
 function App() {
   return (
@@ -41,6 +44,11 @@ function App() {
                 <DoctorDashboard />
               </PrivateRoute>
             } />
+            <Route path="/reservation-choice" element={
+              <PrivateRoute>
+                <ReservationChoice />
+              </PrivateRoute>
+            } />
             <Route path="/Voice/DepartmentDoctorSelection" element={
               <PrivateRoute>
                 <DepartmentDoctorSelection />
@@ -49,6 +57,21 @@ function App() {
             <Route path="/Voice/ReservationScreen" element={
               <PrivateRoute>
                 <ReservationScreen />
+              </PrivateRoute>
+            } />
+            <Route path="/Standard/ReservationScreen" element={
+              <PrivateRoute>
+                <StandardReservation />
+              </PrivateRoute>
+            } />
+            <Route path="/standard-reservation" element={
+              <PrivateRoute>
+                <DepartmentDoctorSelection />
+              </PrivateRoute>
+            } />
+            <Route path="/Voice/VoiceGuide" element={
+              <PrivateRoute>
+                <VoiceGuide />
               </PrivateRoute>
             } />
             <Route path="/logout" element={

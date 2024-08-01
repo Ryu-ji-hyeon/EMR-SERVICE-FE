@@ -1,22 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useSpeechSynthesis } from 'react-speech-kit';
-import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
-import ResulvationCalender from './ResulvationCalender';
+import ResulvationCalender from '../VoiceReservation/ResulvationCalender';
 import AvailableTimes from './AvailableTimes';
-import ControlPanel from './ControlPanel';
 import { useLocation } from 'react-router-dom';
 import {jwtDecode} from 'jwt-decode';
 
 const VoiceReservationSystem = () => {
-  const [text, setText] = useState('');
-  const { speak, cancel } = useSpeechSynthesis();
-  const { transcript, listening, resetTranscript } = useSpeechRecognition();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [previousResponse, setPreviousResponse] = useState('');
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
   const [csrfToken, setCsrfToken] = useState('');
+  const [availableDoctors, setAvailableDoctors] = useState([]);
   const [availableTimes, setAvailableTimes] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [fullyBookedDates, setFullyBookedDates] = useState([]);
@@ -45,79 +36,6 @@ const VoiceReservationSystem = () => {
       setPatientId(loggedInUserId);
     }
   }, []);
-
-  const speakQuestion = (text) => {
-    const speech = new SpeechSynthesisUtterance(text);
-    speech.lang = "ko-KR";
-    window.speechSynthesis.speak(speech);
-  };
-
-  const askDateQuestion = () => {
-    const questionText = '몇월 며칠 예약할래?';
-    setText(questionText);
-    speakQuestion(questionText);
-  };
-
-  const askTimeQuestion = () => {
-    const questionText = '몇시에 예약하시겠습니까?';
-    setText(questionText);
-    speakQuestion(questionText);
-  };
-
-  const askAlternativeDateQuestion = () => {
-    const questionText = '다른 날짜로 예약 하시겠습니까?';
-    setText(questionText);
-    speakQuestion(questionText);
-  };
-
-  const handleStartListening = () => {
-    SpeechRecognition.startListening({ continuous: true, language: 'ko-KR' });
-  };
-
-  const handleStopListening = () => {
-    SpeechRecognition.stopListening();
-  };
-
-  const handleUserResponse = (response) => {
-    const newResponse = response.replace(previousResponse, '').trim();
-    setPreviousResponse(response);
-
-    axios.post(`${process.env.REACT_APP_API_SERVER}/api/log`, { transcript: newResponse })
-      .then(() => console.log('Transcript logged successfully'))
-      .catch((error) => console.error('Error logging transcript:', error));
-
-    if (currentStep === 0) {
-      const parsedDate = parseDate(newResponse);
-      if (parsedDate) {
-        setDate(parsedDate);
-        askTimeQuestion();
-        setCurrentStep(1);
-      } else {
-        speakQuestion('유효한 날짜를 입력해주세요.');
-        setText('유효한 날짜를 입력해주세요.');
-        handleStartListening();
-      }
-    } else if (currentStep === 1) {
-      const parsedTime = parseTime(newResponse);
-      if (parsedTime) {
-        setTime(parsedTime);
-        checkAvailability(date, parsedTime);
-      } else {
-        speakQuestion('유효한 시간을 입력해주세요.');
-        setText('유효한 시간을 입력해주세요.');
-        handleStartListening();
-      }
-    } else if (currentStep === 2) {
-      if (newResponse.includes('네')) {
-        askDateQuestion();
-        setCurrentStep(0);
-      } else if (newResponse.includes('아니오') || newResponse.includes('아니요')) {
-        speakQuestion('예약을 취소합니다.');
-        setText('예약을 취소합니다.');
-        setCurrentStep(3);
-      }
-    }
-  };
 
   const parseDate = (response) => {
     const match = response.match(/\d+/g);
@@ -151,17 +69,15 @@ const VoiceReservationSystem = () => {
         if (response.data.includes(time)) {
           makeReservation(date, time);
         } else {
-          speakQuestion('이미 예약이 있습니다. 다른 시간을 선택해주세요.');
-          setText('이미 예약이 있습니다. 다른 시간을 선택해주세요.');
-          setCurrentStep(1);
-          handleStartListening();
+          speak({ text: '이미 예약이 있습니다. 다른 시간을 선택해주세요.' });
+          setCurrentStep(3);
+          startListening();
         }
       })
       .catch((error) => {
         console.error('Error checking availability:', error);
-        speakQuestion('예약 확인 중 오류가 발생했습니다. 다시 시도해주세요.');
-        setText('예약 확인 중 오류가 발생했습니다. 다시 시도해주세요.');
-        handleStartListening();
+        speak({ text: '예약 확인 중 오류가 발생했습니다. 다시 시도해주세요.' });
+        startListening();
       });
   };
 
@@ -176,15 +92,13 @@ const VoiceReservationSystem = () => {
       withCredentials: true
     })
       .then((response) => {
-        speakQuestion('예약이 확정되었습니다.');
-        setText('예약이 확정되었습니다.');
+        speak({ text: '예약이 확정되었습니다.' });
         setAvailableTimes(prevTimes => prevTimes.filter(t => t !== time));
-        setCurrentStep(3);
+        setCurrentStep(4);
       })
       .catch((error) => {
         console.error('Error making reservation:', error);
-        speakQuestion('예약 중 오류가 발생했습니다. 다시 시도해주세요.');
-        setText('예약 중 오류가 발생했습니다. 다시 시도해주세요.');
+        speak({ text: '예약 중 오류가 발생했습니다. 다시 시도해주세요.' });
       });
   };
 
@@ -232,6 +146,8 @@ const VoiceReservationSystem = () => {
   return (
     <div style={{ display: 'flex', padding: '20px', flexDirection: 'column' }}>
       <h1>음성 인식 예약 시스템</h1>
+      <button onClick={startListening} className="btn btn-dark mb-3">Start Voice Reservation</button>
+      <p>{transcript}</p>
       {selectedDoctor && (
         <div style={{ display: 'flex', flexDirection: 'row', marginTop: '20px' }}>
           <div style={{ flex: 1 }}>
@@ -245,17 +161,6 @@ const VoiceReservationSystem = () => {
               availableTimes={availableTimes} 
               onTimeClick={handleTimeClick} 
               selectedDate={selectedDate}
-            />
-            <ControlPanel 
-              handleSpeak={() => speak({ text })}
-              handleStopSpeaking={cancel}
-              handleStartListening={handleStartListening}
-              handleStopListening={handleStopListening}
-              handleReset={resetTranscript}
-              listening={listening}
-              transcript={transcript}
-              speakQuestion={speakQuestion}
-              handleUserResponse={handleUserResponse}
             />
           </div>
         </div>

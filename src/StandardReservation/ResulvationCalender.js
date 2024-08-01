@@ -92,6 +92,17 @@ const ResulvationCalender = ({ onDateClick }) => {
     });
   };
 
+   // 커스텀 Week Wrapper를 정의하여 +more 버튼을 제거합니다.
+   const CustomWeekWrapper = ({ children }) => (
+    <div className="rbc-row">
+      {React.Children.map(children, child => 
+        child && React.cloneElement(child, {
+          className: 'rbc-date-cell',
+        })
+      )}
+    </div>
+  );
+
   return (
     <div style={{ height: '500px' }}>
       <Calendar
@@ -114,7 +125,8 @@ const ResulvationCalender = ({ onDateClick }) => {
         }}
         components={{
           dateCellWrapper: CustomDateCellWrapper,
-          timeSlotWrapper: TimeSlotWrapper
+          timeSlotWrapper: TimeSlotWrapper,
+          weekWrapper: CustomWeekWrapper
         }}
         views={['month']}  // 월간 뷰만 보이도록 설정
         onSelectSlot={slotInfo => onDateClick(slotInfo.start)}  // 날짜 클릭 시 onDateClick 함수 호출
