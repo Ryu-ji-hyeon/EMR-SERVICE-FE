@@ -1,9 +1,11 @@
 import React from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './Footer.css'; // 추가
 
 const Footer = () => (
-  <footer className="footer mt-auto py-3 bg-dark" style={{ textAlign: 'center' }}>
-    <div className="container text-center">
-      <span className="text-muted">© 2024 EMR Service. All rights reserved.</span>
+  <footer className="footer bg-dark text-light text-center py-2">
+    <div className="container">
+      <span>© 2024 EMR Service. All rights reserved.</span>
     </div>
   </footer>
 );

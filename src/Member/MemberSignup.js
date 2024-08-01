@@ -18,7 +18,6 @@ const PatientRegistrationForm = () => {
     const [csrfToken, setCsrfToken] = useState('');
 
     useEffect(() => {
-    
         // CSRF 토큰을 서버에서 가져옵니다.
         axios.get(`${process.env.REACT_APP_API_SERVER}/api/csrf-token`, { withCredentials: true })
             .then(response => setCsrfToken(response.data.token))
@@ -45,11 +44,11 @@ const PatientRegistrationForm = () => {
             height: formData.height,
             bloodType: formData.bloodType
         };
-        const registrationDto = {}; // 필요한 경우 추가 필드 설정
 
-        axios.post(`${process.env.REACT_APP_API_SERVER}/api/member/signup`, { memberDto, registrationDto }, {
+        axios.post(`${process.env.REACT_APP_API_SERVER}/api/member/signup`, memberDto, {
             headers: {
-                'X-XSRF-TOKEN': csrfToken
+                'X-XSRF-TOKEN': csrfToken,
+                'Content-Type': 'application/json'
             },
             withCredentials: true
         })

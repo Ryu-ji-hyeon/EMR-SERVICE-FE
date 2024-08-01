@@ -1,9 +1,18 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { useAuth } from '../context/AuthContext';
 
 const NavBar = () => {
-  const { user } = useAuth(); // AuthContext에서 사용자 정보 가져오기
+  const { user, setUser } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // 로그아웃 로직 (예: 토큰 삭제)
+    localStorage.removeItem('accessToken');
+    setUser(null);
+    navigate('/'); // 홈 화면으로 리디렉션
+  };
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -13,10 +22,36 @@ const NavBar = () => {
       </button>
       <div className="collapse navbar-collapse" id="navbarNav">
         <ul className="navbar-nav ml-auto">
-          {user && ( // 사용자가 로그인된 경우에만 버튼을 표시
-            <li className="nav-item">
-              <Link className="nav-link" to="/Voice/VoiceReservationSystem">예약하기</Link>
-            </li>
+          {user ? (
+            <>
+              {user.role === 'MEMBER' && (
+                <>
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/Voice/DepartmentDoctorSelection">예약하기</Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/member/reservations">예약 확인</Link>
+                  </li>
+                </>
+              )}
+              {user.role === 'DOCTOR' && (
+                <li className="nav-item">
+                  <Link className="nav-link" to="/doctor/reservations">예약 확인</Link>
+                </li>
+              )}
+              <li className="nav-item">
+                <button className="nav-link btn btn-link" onClick={handleLogout}>로그아웃</button>
+              </li>
+            </>
+          ) : (
+            <>
+              <li className="nav-item">
+                <Link className="nav-link" to="/home/loginForm">로그인</Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/home/choiceMember">회원가입</Link>
+              </li>
+            </>
           )}
         </ul>
       </div>

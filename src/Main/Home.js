@@ -1,16 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './Home.css'; // 스타일 파일 추가
-
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './Home.css';
 
 const Home = () => (
-  <div className="container-fluid bg-color text-center text-white">
+  <div className="home-container">
     <div className="overlay"></div>
     <div className="content">
-      <h1 className="display-4">Welcome to the EMR Service</h1>
-      <p className="lead">Efficient and secure management of electronic medical records.</p>
-      <Link className="btn btn-outline-light btn-lg mx-2" to="/home/loginForm">로그인</Link>
-      <Link className="btn btn-outline-info btn-lg mx-2" to="/home/choiceMember">회원가입</Link>
+      <h1 className="display-4">AI 음성 인식 기반 EMR 예약 서비스</h1>
+      <p className="lead">안전하고 효율적인 전자 의료 기록 관리.</p>
+      <div className="button-group">
+        <Link className="btn btn-dark-gray btn-lg mx-2" to="/home/loginForm">로그인</Link>
+        <Link className="btn btn-light-gray btn-lg mx-2" to="/home/choiceMember">회원가입</Link>
+      </div>
     </div>
   </div>
 );

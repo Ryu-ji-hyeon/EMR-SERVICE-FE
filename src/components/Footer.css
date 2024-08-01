@@ -1,0 +1,19 @@
+/* src/Footer.css */
+.footer {
+    background-color: #000000; /* 검정 배경 */
+    color: #ffffff; /* 흰색 글씨 */
+    padding: 5px 0; /* 위아래 여백을 최소화 */
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    text-align: center;
+    height: 30px; /* 하단 바 높이를 줄임 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .footer .container {
+    background-color: transparent; /* 흰색 배경 제거 */
+  }
+  

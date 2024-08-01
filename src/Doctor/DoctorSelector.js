@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const DoctorSelector = ({ department, onSelect }) => {
   const [doctors, setDoctors] = useState([]);
@@ -56,9 +57,9 @@ const DoctorSelector = ({ department, onSelect }) => {
   };
 
   return (
-    <div>
+    <div className="mt-4">
       <h2>의사 선생님을 선택하세요</h2>
-      <select value={selectedDoctor} onChange={handleSelect}>
+      <select className="form-control" value={selectedDoctor} onChange={handleSelect}>
         <option value="" disabled>의사 선생님을 선택하세요</option>
         {doctors.map((doctor, index) => (
           <option key={index} value={doctor.doctorId}>{doctor.doctorName}</option>
