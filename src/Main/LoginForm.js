@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { useAuth } from '../context/AuthContext';
 
 const LoginForm = () => {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
@@ -32,42 +32,17 @@ const LoginForm = () => {
     setErrorMessage('');
 
     try {
-      let endpoint = '';
-      let loginData = {};
+      const response = await handleLogin(credentials.username, credentials.password, loginType, csrfToken);
 
-      if (loginType === 'member') {
-        endpoint = '/api/member/login';
-        loginData = {
-          patientLoginId: credentials.username,
-          patientPw: credentials.password
-        };
-      } else if (loginType === 'doctor') {
-        endpoint = '/api/doctor/login';
-        loginData = {
-          doctorLoginId: credentials.username,
-          doctorPw: credentials.password
-        };
-      }
-
-      const response = await axios.post(`${process.env.REACT_APP_API_SERVER}${endpoint}`, loginData, {
-        headers: {
-          'X-XSRF-TOKEN': csrfToken
-        },
-        withCredentials: true
-      });
-
-      console.log('로그인 성공:', response.data);
+      console.log('로그인 성공:', response);
       alert('로그인이 성공적으로 완료되었습니다.');
-      localStorage.setItem('accessToken', response.data.token);
 
-      await handleLogin(credentials.username, credentials.password, loginType, csrfToken);
-
-      if (response.data.role === 'MEMBER') {
+      if (response.role === 'MEMBER') {
         navigate(`/member/dashboard`);
-      } else if (response.data.role === 'DOCTOR') {
+      } else if (response.role === 'DOCTOR') {
         navigate(`/doctor/dashboard`);
       } else {
-        console.error('알 수 없는 사용자 역할:', response.data.role);
+        console.error('알 수 없는 사용자 역할:', response.role);
       }
     } catch (error) {
       console.error('로그인 실패:', error);
