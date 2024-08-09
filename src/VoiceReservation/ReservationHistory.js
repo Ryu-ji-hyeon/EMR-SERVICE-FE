@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {jwtDecode} from 'jwt-decode';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './ReservationHistory.css'; // 추가
+import './ReservationHistory.css';
 
 const ReservationHistory = () => {
     const [reservations, setReservations] = useState([]);
@@ -25,9 +25,20 @@ const ReservationHistory = () => {
         if (token) {
             const decodedToken = jwtDecode(token);
             console.log("Decoded Token: ", decodedToken);
-            const loggedInUserId = decodedToken?.sub;
-            console.log("loggedInUserID: ", loggedInUserId);
-            setPatientId(loggedInUserId);
+            const patientLoginId = decodedToken?.sub; // JWT에서 patientLoginId 추출
+            console.log("patientLoginId: ", patientLoginId);
+
+            // patientLoginId를 사용하여 patientId를 가져오는 API 호출
+            axios.get(`${process.env.REACT_APP_API_SERVER}/api/member/patient-id`, {
+                params: { loginId: patientLoginId },
+                withCredentials: true
+            })
+            .then(response => {
+                setPatientId(response.data); // patientId 설정
+            })
+            .catch(error => {
+                console.error('Error fetching patient ID:', error);
+            });
         }
     }, []);
 
