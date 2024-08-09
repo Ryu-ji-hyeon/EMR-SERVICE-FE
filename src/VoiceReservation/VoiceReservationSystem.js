@@ -2,25 +2,31 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSpeechSynthesis } from 'react-speech-kit';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
-import { useLocation } from 'react-router-dom';
-import jwtDecode from 'jwt-decode';
+import ResulvationCalender from '../StandardReservation/ResulvationCalender';
+import AvailableTimes from '../StandardReservation/AvailableTimes';
+import ControlPanel from './ControlPanel';
+import {jwtDecode} from 'jwt-decode';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const VoiceReservationSystem = () => {
-  const { speak } = useSpeechSynthesis();
+  const [text, setText] = useState('');
+  const { speak, cancel } = useSpeechSynthesis();
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
-  const [step, setStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
   const [department, setDepartment] = useState('');
   const [doctor, setDoctor] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
+  const [csrfToken, setCsrfToken] = useState('');
   const [availableDoctors, setAvailableDoctors] = useState([]);
   const [availableTimes, setAvailableTimes] = useState([]);
-  const [csrfToken, setCsrfToken] = useState('');
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [fullyBookedDates, setFullyBookedDates] = useState([]);
   const location = useLocation();
   const { selectedDoctor } = location.state || {};
   const [patientId, setPatientId] = useState(null);
-  const [userCommands, setUserCommands] = useState([]);
-
+  const navigate = useNavigate();
+  
   useEffect(() => {
     const fetchCsrfToken = async () => {
       try {
@@ -37,9 +43,23 @@ const VoiceReservationSystem = () => {
     if (token) {
       const decodedToken = jwtDecode(token);
       const loggedInUserId = decodedToken?.sub;
-      setPatientId(loggedInUserId);
+
+      axios.get(`${process.env.REACT_APP_API_SERVER}/api/member/patient-id`, {
+        params: { loginId: loggedInUserId },
+        withCredentials: true
+      })
+      .then((response) => {
+        setPatientId(response.data);
+      })
+      .catch((error) => {
+        console.error('Error fetching patient ID:', error);
+      });
+
+      if (selectedDoctor) {
+        fetchFullyBookedDates(selectedDoctor.doctorId);
+      }
     }
-  }, []);
+  }, [selectedDoctor]);
 
   useEffect(() => {
     if (!listening && transcript) {
@@ -50,29 +70,18 @@ const VoiceReservationSystem = () => {
 
   const startListening = () => SpeechRecognition.startListening({ continuous: true, language: 'ko-KR' });
 
-  const startVoiceGuide = () => {
-    speak({ text: '부서 안내 화면입니다. 부서 이름 듣고 싶으십니까?' });
-    setTimeout(() => {
-      startListening();
-    }, 3000);
-  };
-
   const handleVoiceCommand = (command) => {
-    setUserCommands(prevCommands => [...prevCommands, command]);
-    switch (step) {
+    switch (currentStep) {
       case 0:
-        askIfWantDepartmentList(command);
-        break;
-      case 1:
         handleDepartmentSelection(command);
         break;
-      case 2:
+      case 1:
         handleDoctorSelection(command);
         break;
-      case 3:
+      case 2:
         handleDateSelection(command);
         break;
-      case 4:
+      case 3:
         handleTimeSelection(command);
         break;
       default:
@@ -80,58 +89,98 @@ const VoiceReservationSystem = () => {
     }
   };
 
-  const askIfWantDepartmentList = (command) => {
-    if (command.includes('네')) {
-      readDepartmentList();
-      setTimeout(() => {
-        SpeechRecognition.stopListening();
-      }, 3000); // 3초 후 음성 인식 중지
-    } else if (command.includes('아니오')) {
-      speak({ text: '어느 부서를 선택하시겠습니까?' });
-      setStep(1);
-      startListening();
-    }
-  };
-
-  const readDepartmentList = () => {
-    const departmentNames = availableDepartments.map(dept => dept.name).join(', ');
-    speak({ text: `다음은 부서 목록입니다: ${departmentNames}. 어느 부서를 선택하시겠습니까?` });
-    setStep(1);
-    startListening();
+  const fetchFullyBookedDates = (doctorId) => {
+    axios.get(`${process.env.REACT_APP_API_SERVER}/api/reservations/fully-booked-dates`, {
+      params: { doctorId },
+      withCredentials: true
+    })
+    .then((response) => {
+      setFullyBookedDates(response.data);
+    })
+    .catch((error) => {
+      console.error('Error fetching fully booked dates:', error);
+    });
   };
 
   const handleDepartmentSelection = (command) => {
-    const selectedDept = availableDepartments.find(dept => dept.name === command);
-    if (selectedDept) {
-      setDepartment(selectedDept.name);
-      speak({ text: `${selectedDept.name} 부서를 선택하셨습니다. 의사 이름을 말해주세요.` });
-      setStep(2);
-      // 실제 부서 기반 의사 목록 가져오는 로직 추가
+    setDepartment(command);
+    speak({ text: `${command} 부서를 선택하셨습니다. 의사 이름을 말해주세요.` });
+    setCurrentStep(1);
+  };
+
+  const handleDoctorSelection = (command) => {
+    setDoctor(command);
+    speak({ text: `${command} 의사를 선택하셨습니다. 예약할 날짜를 말해주세요.` });
+    setCurrentStep(2);
+  };
+
+  const handleDateSelection = (command) => {
+    const parsedDate = parseDate(command);
+    if (parsedDate) {
+      setDate(parsedDate);
+      setSelectedDate(parsedDate); // 추가
+      speak({ text: `${parsedDate} 날짜를 선택하셨습니다. 예약할 시간을 말해주세요.` });
+      setCurrentStep(3);
+      fetchAvailableTimes(selectedDoctor?.doctorId, parsedDate); // 날짜 선택 후 가능한 시간을 가져옴
     } else {
-      speak({ text: '유효한 부서를 선택해주세요.' });
+      speak({ text: '유효한 날짜를 입력해주세요.' });
       startListening();
     }
   };
 
-  const handleDoctorSelection = (command) => {
-    // 의사 선택 로직
-    setDoctor(command);  // 여기서는 단순히 명령을 의사 이름으로 설정
-    speak({ text: `${command} 의사를 선택하셨습니다. 예약할 날짜를 말해주세요.` });
-    setStep(3);
-    // 실제 의사 기반 예약 가능한 날짜 가져오는 로직 추가
-  };
-
-  const handleDateSelection = (command) => {
-    // 날짜 선택 로직
-    setDate(command);  // 여기서는 단순히 명령을 날짜로 설정
-    speak({ text: `${command} 날짜를 선택하셨습니다. 예약할 시간을 말해주세요.` });
-    setStep(4);
-    // 실제 날짜 기반 예약 가능한 시간 가져오는 로직 추가
-  };
-
   const handleTimeSelection = (command) => {
-    setTime(command);
-    makeReservation(date, command);
+    const parsedTime = parseTime(command);
+    if (parsedTime) {
+      setTime(parsedTime);
+      checkAvailability(date, parsedTime);
+    } else {
+      speak({ text: '유효한 시간을 입력해주세요.' });
+      startListening();
+    }
+  };
+
+  const parseDate = (response) => {
+    const match = response.match(/\d+/g);
+    if (match && match.length >= 2) {
+      const [month, day] = match;
+      const year = new Date().getFullYear();
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+    return null;
+  };
+
+  const parseTime = (response) => {
+    const match = response.match(/\d{1,2}/);
+    if (match) {
+      return `${match[0].padStart(2, '0')}:00`;
+    }
+    return null;
+  };
+
+  const checkAvailability = (date, time) => {
+    const token = localStorage.getItem('accessToken');
+    axios.get(`${process.env.REACT_APP_API_SERVER}/api/reservations/check`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'X-XSRF-TOKEN': csrfToken
+      },
+      params: { doctorId: selectedDoctor?.doctorId, date, time },
+      withCredentials: true
+    })
+      .then((response) => {
+        if (response.data.available) {
+          makeReservation(date, time);
+        } else {
+          speak({ text: '이미 예약이 있습니다. 다른 시간을 선택해주세요.' });
+          setCurrentStep(3);
+          startListening();
+        }
+      })
+      .catch((error) => {
+        console.error('Error checking availability:', error);
+        speak({ text: '예약 확인 중 오류가 발생했습니다. 다시 시도해주세요.' });
+        startListening();
+      });
   };
 
   const makeReservation = (date, time) => {
@@ -139,13 +188,22 @@ const VoiceReservationSystem = () => {
     axios.post(`${process.env.REACT_APP_API_SERVER}/api/reservations/reserve`, null, {
       headers: {
         'Authorization': `Bearer ${token}`,
-        'X-XSRF-TOKEN': csrfToken
+        'X-XSRF-TOKEN': csrfToken,
+        'Content-Type': 'application/json'
       },
-      params: { doctorId: selectedDoctor?.doctorId, patientId, date, time },
+      params: {
+        doctorId: selectedDoctor?.doctorId,
+        patientId: patientId,
+        date,
+        time
+      },
       withCredentials: true
     })
       .then((response) => {
-        speak({ text: `${date} 일 ${time} 시간에 예약이 완료되었습니다.` });
+        speak({ text: '예약이 확정되었습니다.' });
+        setAvailableTimes(prevTimes => prevTimes.filter(t => t !== time));
+        setCurrentStep(4);
+        navigate('/member/reservations');
       })
       .catch((error) => {
         console.error('Error making reservation:', error);
@@ -153,21 +211,73 @@ const VoiceReservationSystem = () => {
       });
   };
 
+  const fetchAvailableTimes = (doctorId, date) => {
+    const token = localStorage.getItem('accessToken');
+    axios.get(`${process.env.REACT_APP_API_SERVER}/api/reservations/available-times`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'X-XSRF-TOKEN': csrfToken
+      },
+      params: { doctorId, date },
+      withCredentials: true
+    })
+    .then((response) => {
+      setAvailableTimes(response.data);
+    })
+    .catch((error) => {
+      console.error('Error fetching available times:', error);
+    });
+  };
+
+  const handleDateClick = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+
+    setSelectedDate(formattedDate);
+    fetchAvailableTimes(selectedDoctor?.doctorId, formattedDate);
+  };
+
+  const handleTimeClick = (time) => {
+    const confirmReservation = window.confirm('예약하시겠습니까?');
+    if (confirmReservation) {
+      checkAvailability(selectedDate, time);
+    }
+  };
+
   return (
-    <div className="container mt-5">
-      <h1 className="text-center mb-4">음성 인식 예약 시스템</h1>
-      <div className="text-center">
-        <button className="btn btn-primary" onClick={startVoiceGuide}>음성 안내 시작</button>
-      </div>
+    <div style={{ display: 'flex', padding: '20px', flexDirection: 'column' }}>
+      <h1>음성 인식 예약 시스템</h1>
+      <button onClick={startListening} className="btn btn-dark mb-3">Start Voice Reservation</button>
       <p>{transcript}</p>
-      <div className="mt-4">
-        <h3>사용자 응답</h3>
-        <ul>
-          {userCommands.map((command, index) => (
-            <li key={index}>{command}</li>
-          ))}
-        </ul>
-      </div>
+      {selectedDoctor && (
+        <div style={{ display: 'flex', flexDirection: 'row', marginTop: '20px' }}>
+          <div style={{ flex: 1 }}>
+            <ResulvationCalender 
+              onDateClick={handleDateClick} 
+              fullyBookedDates={fullyBookedDates}
+            />
+          </div>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <AvailableTimes 
+              availableTimes={availableTimes} 
+              onTimeClick={handleTimeClick} 
+              selectedDate={selectedDate}
+            />
+            <ControlPanel 
+              handleSpeak={() => speak({ text })}
+              handleStopSpeaking={cancel}
+              handleStartListening={startListening}
+              handleStopListening={SpeechRecognition.stopListening}
+              handleReset={resetTranscript}
+              listening={listening}
+              transcript={transcript}
+              handleUserResponse={handleVoiceCommand}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

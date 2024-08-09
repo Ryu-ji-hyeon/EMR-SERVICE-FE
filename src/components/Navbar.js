@@ -32,16 +32,25 @@ const NavBar = () => {
                   <li className="nav-item">
                     <Link className="nav-link" to="/member/reservations">예약 확인</Link>
                   </li>
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/member/prescriptions">처방전 확인</Link>
+                  </li>
                 </>
               )}
               {user.role === 'DOCTOR' && (
+                <>
                 <li className="nav-item">
                   <Link className="nav-link" to="/doctor/reservations">예약 확인</Link>
                 </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/doctor/prescribe">처방전 입력</Link>
+                </li>
+                </>
               )}
               <li className="nav-item">
                 <button className="nav-link btn btn-link" onClick={handleLogout}>로그아웃</button>
               </li>
+              
             </>
           ) : (
             <>
