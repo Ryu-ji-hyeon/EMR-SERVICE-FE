@@ -20,6 +20,7 @@ import VoiceGuide from './VoiceReservation/VoiceGuide';
 import CreatePrescription from './Doctor/CreatePrescription';
 import ViewPrescriptions from './Member/ViewPrescriptions';
 import DoctorReservations from './Doctor/DoctorReservations';
+import ReservationDetails from './VoiceReservation/ReservationDetails';
 
 function App() {
   return (
@@ -37,9 +38,16 @@ function App() {
                 <MemberDashboard />
               </PrivateRoute>
             } />
+            // 예약 확인
             <Route path="/member/reservations" element={
             <PrivateRoute>
               <ReservationHistory />
+            </PrivateRoute>
+          } />
+            // 예약 자세히 보기
+           <Route path="/reservation/details" element={
+            <PrivateRoute>
+              <ReservationDetails />
             </PrivateRoute>
           } />
           <Route path="/member/prescriptions" element={

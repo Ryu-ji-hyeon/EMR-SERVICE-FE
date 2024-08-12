@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import {jwtDecode} from 'jwt-decode';
+import { useNavigate } from 'react-router-dom'; // 페이지 이동을 위해 useNavigate 훅 사용
+import { jwtDecode } from 'jwt-decode';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './ReservationHistory.css';
 
@@ -8,6 +9,7 @@ const ReservationHistory = () => {
     const [reservations, setReservations] = useState([]);
     const [patientId, setPatientId] = useState(null);
     const [csrfToken, setCsrfToken] = useState('');
+    const navigate = useNavigate(); // 페이지 이동을 위한 navigate 훅
 
     useEffect(() => {
         const fetchCsrfToken = async () => {
@@ -24,9 +26,7 @@ const ReservationHistory = () => {
         const token = localStorage.getItem('accessToken');
         if (token) {
             const decodedToken = jwtDecode(token);
-            console.log("Decoded Token: ", decodedToken);
             const patientLoginId = decodedToken?.sub; // JWT에서 patientLoginId 추출
-            console.log("patientLoginId: ", patientLoginId);
 
             // patientLoginId를 사용하여 patientId를 가져오는 API 호출
             axios.get(`${process.env.REACT_APP_API_SERVER}/api/member/patient-id`, {
@@ -43,7 +43,7 @@ const ReservationHistory = () => {
     }, []);
 
     useEffect(() => {
-        if (patientId) {
+        if (patientId && csrfToken) {
             axios.get(`${process.env.REACT_APP_API_SERVER}/api/reservations/patient/${patientId}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
@@ -65,6 +65,10 @@ const ReservationHistory = () => {
         }
     }, [patientId, csrfToken]);
 
+    const handleViewDetails = (reservationId) => {
+        navigate('/reservation/details', { state: { reservationId } });
+    };
+
     return (
         <div className="container mt-5">
             <h2 className="text-center mb-4">예약 내역</h2>
@@ -74,11 +78,17 @@ const ReservationHistory = () => {
                 ) : (
                     <ul className="list-group">
                         {reservations.map((reservation) => (
-                            <li key={reservation.id} className="list-group-item mb-3">
+                            <li key={reservation.reservationId} className="list-group-item mb-3">
                                 <p><strong>의사:</strong> {reservation.doctorName}</p>
                                 <p><strong>부서:</strong> {reservation.deptName}</p>
                                 <p><strong>날짜:</strong> {reservation.date}</p>
                                 <p><strong>시간:</strong> {reservation.time}</p>
+                                <button 
+                                    className="btn btn-primary mt-2"
+                                    onClick={() => handleViewDetails(reservation.reservationId)} // 예약 ID를 넘겨줌
+                                >
+                                    자세히 보기
+                                </button>
                             </li>
                         ))}
                     </ul>
