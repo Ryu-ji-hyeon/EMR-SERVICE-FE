@@ -1,8 +1,133 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import styled from 'styled-components';
 import { useAuth } from '../context/AuthContext';
+import { FaGoogle, FaLeaf, FaComment } from 'react-icons/fa';  // react-icons에서 아이콘 가져오기
+import ScreenContainer from '../components/ScreenContainer';
+import Content from '../components/Content';
+
+const FormGroup = styled.div`
+  margin-bottom: 1rem;
+  width: 100%;
+`;
+
+const Label = styled.label`
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+  font-weight: bold;
+`;
+
+const Select = styled.select`
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+  font-size: 1rem;
+  color: #333;
+
+  &:focus {
+    outline: none;
+    border-color: #2260ff;
+  }
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+  font-size: 1rem;
+  color: #333;
+
+  &:focus {
+    outline: none;
+    border-color: #2260ff;
+  }
+`;
+
+const ErrorMessage = styled.div`
+  color: red;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+`;
+
+const Button = styled.button`
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #2260ff;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 1rem;
+
+  &:hover {
+    background-color: #1c3faa;
+  }
+`;
+
+const StyledLink = styled(Link)`
+  color: #2260ff;
+  text-decoration: none;
+  font-weight: bold;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const SocialLoginContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+
+  a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0.5rem;
+    color: #333;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: bold;
+    border: 1px solid #ddd;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: #f0f0f0;
+    }
+
+    svg {
+      margin-right: 0.5rem;
+    }
+  }
+`;
+
+const CardFooter = styled.div`
+  text-align: center;
+  margin-top: 1.5rem;
+  border-top: 1px solid #e6e6e6;
+  padding-top: 1rem;
+
+  a {
+    color: #2260ff;
+    text-decoration: none;
+    font-weight: bold;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`;
 
 const LoginForm = () => {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
@@ -51,46 +176,44 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-header bg-dark text-white text-center">
-              <h3>로그인</h3>
-            </div>
-            <div className="card-body">
-              <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                  <label htmlFor="loginType">로그인 유형</label>
-                  <select className="form-control" id="loginType" value={loginType} onChange={handleLoginTypeChange}>
-                    <option value="member">회원 로그인</option>
-                    <option value="doctor">의사 로그인</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="username">아이디</label>
-                  <input type="text" className="form-control" id="username" name="username" placeholder="아이디" value={credentials.username} onChange={handleChange} required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="password">비밀번호</label>
-                  <input type="password" className="form-control" id="password" name="password" placeholder="비밀번호" value={credentials.password} onChange={handleChange} required />
-                </div>
-                {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
-                <button type="submit" className="btn btn-dark btn-block">로그인</button>
-              </form>
-            </div>
-            <div className="card-footer text-center">
-              <Link to="/home/choiceMember" className="btn btn-outline-info">회원가입</Link>
-              <div className="mt-3">
-                <a href="http://localhost:8080/api/v1/auth/oauth2/google" className="btn btn-outline-dark mx-1">Google</a>
-                <a href="http://localhost:8080/api/v1/auth/oauth2/naver" className="btn btn-outline-dark mx-1">Naver</a>
-                <a href="http://localhost:8080/api/v1/auth/oauth2/kakao" className="btn btn-outline-dark mx-1">Kakao</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <ScreenContainer>
+      <Content>
+        <h3>로그인</h3>
+        <form onSubmit={handleSubmit}>
+          <FormGroup>
+            <Label htmlFor="loginType">로그인 유형</Label>
+            <Select id="loginType" value={loginType} onChange={handleLoginTypeChange}>
+              <option value="member">회원 로그인</option>
+              <option value="doctor">의사 로그인</option>
+            </Select>
+          </FormGroup>
+          <FormGroup>
+            <Label htmlFor="username">아이디</Label>
+            <Input type="text" id="username" name="username" placeholder="아이디" value={credentials.username} onChange={handleChange} required />
+          </FormGroup>
+          <FormGroup>
+            <Label htmlFor="password">비밀번호</Label>
+            <Input type="password" id="password" name="password" placeholder="비밀번호" value={credentials.password} onChange={handleChange} required />
+          </FormGroup>
+          {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
+          <Button type="submit">로그인</Button>
+        </form>
+        <CardFooter>
+          <StyledLink to="/home/choiceMember">회원가입</StyledLink>
+          <SocialLoginContainer>
+            <a href="http://localhost:8080/oauth2/callback/google">
+              <FaGoogle /> Google
+            </a>
+            <a href="http://localhost:8080/oauth2/callback/naver">
+              <FaLeaf /> Naver
+            </a>
+            <a href="http://localhost:8080/oauth2/callback/kakao">
+              <FaComment /> Kakao
+            </a>
+          </SocialLoginContainer>
+        </CardFooter>
+      </Content>
+    </ScreenContainer>
   );
 };
 

@@ -4,8 +4,16 @@ import moment from 'moment';
 import axios from 'axios';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import styled from 'styled-components';
 
 const localizer = momentLocalizer(moment);
+
+const CalendarContainer = styled.div`
+  width: 90%;
+  max-width: 500px;
+  margin: 0 auto;
+  font-size: 0.8em;
+`;
 
 const ResulvationCalender = ({ onDateClick }) => {
   const [events, setEvents] = useState([]);
@@ -28,8 +36,6 @@ const ResulvationCalender = ({ onDateClick }) => {
           withCredentials: true
         });
 
-        console.log('Server Response:', response.data); // 서버 응답 데이터 출력
-
         if (Array.isArray(response.data)) {
           const reservations = response.data.map(reservation => ({
             start: new Date(reservation.date + 'T' + reservation.time),
@@ -50,89 +56,45 @@ const ResulvationCalender = ({ onDateClick }) => {
     fetchReservations();
   }, []);
 
-  const TimeSlotWrapper = ({ children, value }) => {
-    const hour = value.getHours();
-    const isLunchTime = hour === 12;
-  
-    return React.cloneElement(children, {
-      style: {
-        ...children.props.style,
-        backgroundColor: isLunchTime ? 'gray' : (children.props.style && children.props.style.backgroundColor),
-      },
-    });
-  };
-
-  // 특정 요일 비활성화
-  const disabledDays = [0, 2, 4, 6]; // 일요일, 화요일, 목요일, 토요일
+  // 화요일과 목요일을 예약 불가 날짜로 설정
+  const disabledDays = [0,2, 4,6]; // 화요일(2), 목요일(4)
 
   const CustomDateCellWrapper = ({ children, value }) => {
     const day = value.getDay();
     const isDisabledDay = disabledDays.includes(day);
-    const isToday = moment(value).isSame(moment(), 'day'); // 오늘 날짜 확인
-  
+
     return React.cloneElement(children, {
       style: {
         ...children.props.style,
         backgroundColor: isDisabledDay ? '#e0e0e0' : 'white',
         color: isDisabledDay ? '#999999' : 'inherit',
-        pointerEvents: isDisabledDay ? 'none' : 'auto',
-        position: 'relative',
-        border: isToday ? '2px solid blue' : 'none', // 오늘 날짜 강조
-      },
-      children: (
-        <div>
-          {children.props.children}
-          {isDisabledDay && (
-            <div className="disabled-day-overlay">
-              예약 불가
-            </div>
-          )}
-        </div>
-      ),
+        pointerEvents: isDisabledDay ? 'none' : 'auto', // 클릭 비활성화
+        cursor: isDisabledDay ? 'default' : 'pointer'   // 커서 모양 변경
+      }
     });
   };
 
-   // 커스텀 Week Wrapper를 정의하여 +more 버튼을 제거합니다.
-   const CustomWeekWrapper = ({ children }) => (
-    <div className="rbc-row">
-      {React.Children.map(children, child => 
-        child && React.cloneElement(child, {
-          className: 'rbc-date-cell',
-        })
-      )}
-    </div>
-  );
-
   return (
-    <div style={{ height: '500px' }}>
+    <CalendarContainer>
       <Calendar
         localizer={localizer}
         events={events}
         startAccessor="start"
         endAccessor="end"
-        style={{ height: 500 }}
-        step={30}  // 30분 단위
-        timeslots={1}  // 각 시간 슬롯을 1개로 나눔 (즉, 30분 단위)
-        min={new Date(2024, 7, 24, 9, 0)}  // 시작 시간: 오전 9시
-        max={new Date(2024, 7, 24, 18, 0)} // 끝 시간: 오후 6시
-        eventPropGetter={() => {
-          return {
-            style: {
-              backgroundColor: 'transparent',  // 배경색을 투명으로 설정
-              border: 'none'                   // 테두리를 제거
-            }
-          };
+        style={{ height: 300 }}
+        views={['month']}
+        onSelectSlot={slotInfo => {
+          const day = slotInfo.start.getDay(); // 날짜 객체에서 요일 가져오기
+          if (!disabledDays.includes(day)) {
+            onDateClick(slotInfo.start);
+          }
         }}
-        components={{
-          dateCellWrapper: CustomDateCellWrapper,
-          timeSlotWrapper: TimeSlotWrapper,
-          weekWrapper: CustomWeekWrapper
-        }}
-        views={['month']}  // 월간 뷰만 보이도록 설정
-        onSelectSlot={slotInfo => onDateClick(slotInfo.start)}  // 날짜 클릭 시 onDateClick 함수 호출
         selectable
+        components={{
+          dateCellWrapper: CustomDateCellWrapper
+        }}
       />
-    </div>
+    </CalendarContainer>
   );
 };
 

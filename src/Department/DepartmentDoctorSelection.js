@@ -3,15 +3,82 @@ import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DepartmentSelector from './DepartmentSelector';
 import DoctorSelector from '../Doctor/DoctorSelector';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import styled from 'styled-components';
 import { useSpeechSynthesis } from 'react-speech-kit';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
+import ScreenContainer from '../components/ScreenContainer';
+import Content from '../components/Content';
+
+const Title = styled.h1`
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #333;
+
+  /* 반응형 디자인을 위한 미디어 쿼리 */
+  @media (max-width: 480px) {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+`;
+
+const Card = styled.div`
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+  /* 반응형 디자인을 위한 미디어 쿼리 */
+  @media (max-width: 480px) {
+    padding: 1rem;
+  }
+`;
+
+const Button = styled.button`
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1.25rem;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #2260ff;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #1c3faa;
+  }
+
+  /* 반응형 디자인을 위한 미디어 쿼리 */
+  @media (max-width: 480px) {
+    font-size: 1rem;
+    padding: 0.5rem;
+  }
+`;
+
+const ResponseList = styled.ul`
+  list-style-type: none;
+  padding: 0;
+
+  li {
+    background-color: #f9f9f9;
+    margin-bottom: 0.5rem;
+    padding: 0.75rem;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+
+    /* 반응형 디자인을 위한 미디어 쿼리 */
+    @media (max-width: 480px) {
+      font-size: 0.875rem;
+      padding: 0.5rem;
+    }
+  }
+`;
 
 const DepartmentDoctorSelection = () => {
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [availableDepartments, setAvailableDepartments] = useState([]); // 초기값을 빈 배열로 설정
+  const [availableDepartments, setAvailableDepartments] = useState([]);
   const [csrfToken, setCsrfToken] = useState('');
   const [patientId, setPatientId] = useState(null);
   const [userCommands, setUserCommands] = useState([]);
@@ -53,7 +120,7 @@ const DepartmentDoctorSelection = () => {
           },
           withCredentials: true
         });
-        console.log('Departments fetched:', response.data); // 디버그: 반환된 데이터 확인
+        console.log('Departments fetched:', response.data);
         setAvailableDepartments(response.data);
       } catch (error) {
         console.error('Error fetching departments:', error);
@@ -84,7 +151,7 @@ const DepartmentDoctorSelection = () => {
     speak({ text, lang: 'ko-KR' });
     setTimeout(() => {
       startListening();
-    }, 3000); // 음성 안내 후 3초 후에 다시 음성 인식을 시작
+    }, 3000);
   };
 
   const startVoiceGuide = () => {
@@ -117,7 +184,7 @@ const DepartmentDoctorSelection = () => {
   const askIfWantDepartmentList = (command) => {
     if (command.includes('네')) {
       readDepartmentList();
-    } else if (command.includes('아니오')||('아니요')) {
+    } else if (command.includes('아니오') || command.includes('아니요')) {
       speakQuestion('어느 부서를 선택하시겠습니까?');
       setCurrentStep(1);
     }
@@ -224,30 +291,33 @@ const DepartmentDoctorSelection = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <h1 className="text-center mb-4">예약 시스템</h1>
-      <div className="card p-4">
-        <DepartmentSelector onSelect={handleDepartmentSelect} />
-        {selectedDepartment && (
-          <DoctorSelector department={selectedDepartment} onSelect={handleDoctorSelect} />
-        )}
-      </div>
-      <div className="text-center mt-4">
-        <button className="btn btn-primary" onClick={startVoiceGuide}>음성 안내 시작</button>
-      </div>
-      <div className="mt-4">
-        <h3>사용자 응답</h3>
-        <ul>
-          {userCommands.map((command, index) => (
-            <li key={index}>{command}</li>
-          ))}
-        </ul>
-      </div>
-      <p>인식된 텍스트: {transcript}</p>
-      <br />
-      <button onClick={handleStopListening}>응답 종료</button>
-      <button onClick={handleReset}>리셋</button>
-    </div>
+    <ScreenContainer>
+      <Content>
+        <Title>예약 시스템</Title>
+        <Card>
+          <DepartmentSelector onSelect={handleDepartmentSelect} />
+          {selectedDepartment && (
+            <DoctorSelector department={selectedDepartment} onSelect={handleDoctorSelect} />
+          )}
+        </Card>
+        <div className="text-center mt-4">
+          <Button onClick={startVoiceGuide}>음성 안내 시작</Button>
+        </div>
+        <div className="mt-4">
+          <h3>사용자 응답</h3>
+          <ResponseList>
+            {userCommands.map((command, index) => (
+              <li key={index}>{command}</li>
+            ))}
+          </ResponseList>
+        </div>
+        <p>인식된 텍스트: {transcript}</p>
+        <div>
+          <Button onClick={handleStopListening}>응답 종료</Button>
+          <Button onClick={handleReset}>리셋</Button>
+        </div>
+      </Content>
+    </ScreenContainer>
   );
 };
 

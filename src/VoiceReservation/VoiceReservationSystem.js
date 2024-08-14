@@ -5,8 +5,65 @@ import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognitio
 import ResulvationCalender from '../StandardReservation/ResulvationCalender';
 import AvailableTimes from '../StandardReservation/AvailableTimes';
 import ControlPanel from './ControlPanel';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import { useLocation, useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+
+const Title = styled.h1`
+  text-align: center;
+  margin-top: 20px;
+`;
+
+const ReservationContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+`;
+
+const CalendarContainer = styled.div`
+  margin-bottom: 30px;
+  width: 100%;
+  max-width: 500px;
+`;
+
+const AvailableTimesContainer = styled.div`
+  margin-bottom: 30px;
+  width: 100%;
+  max-width: 500px;
+`;
+
+const Button = styled.button`
+  width: 100%;
+  max-width: 500px;
+  padding: 15px;
+  font-size: 18px;
+  font-weight: bold;
+  background-color: #1c74e9;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #0f5bb5;
+  }
+`;
+
+const ControlPanelContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+`;
+
+const Transcript = styled.p`
+  margin-top: 20px;
+  font-size: 16px;
+  color: #333;
+  word-break: break-word;
+`;
 
 const VoiceReservationSystem = () => {
   const [text, setText] = useState('');
@@ -26,7 +83,7 @@ const VoiceReservationSystem = () => {
   const { selectedDoctor } = location.state || {};
   const [patientId, setPatientId] = useState(null);
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     const fetchCsrfToken = async () => {
       try {
@@ -118,10 +175,10 @@ const VoiceReservationSystem = () => {
     const parsedDate = parseDate(command);
     if (parsedDate) {
       setDate(parsedDate);
-      setSelectedDate(parsedDate); // 추가
+      setSelectedDate(parsedDate);
       speak({ text: `${parsedDate} 날짜를 선택하셨습니다. 예약할 시간을 말해주세요.` });
       setCurrentStep(3);
-      fetchAvailableTimes(selectedDoctor?.doctorId, parsedDate); // 날짜 선택 후 가능한 시간을 가져옴
+      fetchAvailableTimes(selectedDoctor?.doctorId, parsedDate);
     } else {
       speak({ text: '유효한 날짜를 입력해주세요.' });
       startListening();
@@ -247,24 +304,25 @@ const VoiceReservationSystem = () => {
   };
 
   return (
-    <div style={{ display: 'flex', padding: '20px', flexDirection: 'column' }}>
-      <h1>음성 인식 예약 시스템</h1>
-      <button onClick={startListening} className="btn btn-dark mb-3">Start Voice Reservation</button>
-      <p>{transcript}</p>
+    <ReservationContainer>
+      <Title>음성 인식 예약 시스템</Title>
+      <Button onClick={startListening}>음성 예약 시작</Button>
       {selectedDoctor && (
-        <div style={{ display: 'flex', flexDirection: 'row', marginTop: '20px' }}>
-          <div style={{ flex: 1 }}>
+        <>
+          <CalendarContainer>
             <ResulvationCalender 
               onDateClick={handleDateClick} 
               fullyBookedDates={fullyBookedDates}
             />
-          </div>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          </CalendarContainer>
+          <AvailableTimesContainer>
             <AvailableTimes 
               availableTimes={availableTimes} 
               onTimeClick={handleTimeClick} 
               selectedDate={selectedDate}
             />
+          </AvailableTimesContainer>
+          <ControlPanelContainer>
             <ControlPanel 
               handleSpeak={() => speak({ text })}
               handleStopSpeaking={cancel}
@@ -275,10 +333,13 @@ const VoiceReservationSystem = () => {
               transcript={transcript}
               handleUserResponse={handleVoiceCommand}
             />
-          </div>
-        </div>
+          </ControlPanelContainer>
+          <Transcript>
+            <strong>음성 인식 결과:</strong> {transcript}
+          </Transcript>
+        </>
       )}
-    </div>
+    </ReservationContainer>
   );
 };
 

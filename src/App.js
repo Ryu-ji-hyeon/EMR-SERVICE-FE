@@ -25,10 +25,9 @@ import ReservationDetails from './VoiceReservation/ReservationDetails';
 function App() {
   return (
     <AuthProvider>
-        <NavBar />
         <div className="main-content">
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<LoginForm />} />
             <Route path="/home/loginForm" element={<LoginForm />} />
             <Route path="/home/choiceMember" element={<SignupForm />} />
             <Route path="/doctor/signup" element={<DoctorSignup />} />
@@ -107,7 +106,6 @@ function App() {
             } />
           </Routes>
         </div>
-        <Footer />
     </AuthProvider>
   );
 }
