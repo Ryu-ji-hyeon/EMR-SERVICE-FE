@@ -293,29 +293,13 @@ const DepartmentDoctorSelection = () => {
   return (
     <ScreenContainer>
       <Content>
-        <Title>음성 예약 시스템</Title>
+        <Title>일반 예약 시스템</Title>
         <Card>
           <DepartmentSelector onSelect={handleDepartmentSelect} />
           {selectedDepartment && (
             <DoctorSelector department={selectedDepartment} onSelect={handleDoctorSelect} />
           )}
         </Card>
-        <div className="text-center mt-4">
-          <Button onClick={startVoiceGuide}>음성 안내 시작</Button>
-        </div>
-        <div className="mt-4">
-          <h3>사용자 응답</h3>
-          <ResponseList>
-            {userCommands.map((command, index) => (
-              <li key={index}>{command}</li>
-            ))}
-          </ResponseList>
-        </div>
-        <p>인식된 텍스트: {transcript}</p>
-        <div>
-          <Button onClick={handleStopListening}>응답 종료</Button>
-          <Button onClick={handleReset}>리셋</Button>
-        </div>
       </Content>
     </ScreenContainer>
   );

@@ -29,7 +29,7 @@ const ResulvationCalender = ({ onDateClick }) => {
     const fetchReservations = async () => {
       try {
         const token = localStorage.getItem('accessToken');
-        const response = await axios.get('http://localhost:8080/api/reservations', {
+        const response = await axios.get(`${process.env.REACT_APP_API_SERVER}/api/reservations`, {
           headers: {
             'Authorization': `Bearer ${token}`
           },

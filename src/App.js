@@ -21,6 +21,7 @@ import CreatePrescription from './Doctor/CreatePrescription';
 import ViewPrescriptions from './Member/ViewPrescriptions';
 import DoctorReservations from './Doctor/DoctorReservations';
 import ReservationDetails from './VoiceReservation/ReservationDetails';
+import StandardDepartmentDoctorSelector from './Department/StandardDepartmentDoctorSelector';
 
 function App() {
   return (
@@ -91,7 +92,7 @@ function App() {
             } />
             <Route path="/standard-reservation" element={
               <PrivateRoute>
-                <DepartmentDoctorSelection />
+                <StandardDepartmentDoctorSelector />
               </PrivateRoute>
             } />
             <Route path="/Voice/VoiceGuide" element={

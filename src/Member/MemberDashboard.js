@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import ScreenContainer from '../components/ScreenContainer';
 import Content from '../components/Content';
+import NavBar from '../components/NavBar'; // NavBar 컴포넌트 임포트
 
 const CardTitle = styled.h3`
   color: #333;
@@ -40,10 +41,15 @@ const NavLink = styled(Link)`
   }
 `;
 
+const StyledNavBar = styled(NavBar)`
+  margin-bottom: 2rem;
+`;
+
 const MemberDashboard = () => {
   return (
     <ScreenContainer>
       <Content>
+        <StyledNavBar /> {/* 상단바 추가 */}
         <CardTitle>환자 대시보드</CardTitle>
         <NavLink to="/reservation-choice">예약하기</NavLink>
         <NavLink to="/member/reservations">예약 확인</NavLink>
