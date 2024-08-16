@@ -22,6 +22,7 @@ import ViewPrescriptions from './Member/ViewPrescriptions';
 import DoctorReservations from './Doctor/DoctorReservations';
 import ReservationDetails from './VoiceReservation/ReservationDetails';
 import StandardDepartmentDoctorSelector from './Department/StandardDepartmentDoctorSelector';
+import EditPrescription from './Doctor/EditPrescription';
 
 function App() {
   return (
@@ -63,6 +64,11 @@ function App() {
              <Route path="/doctor/prescribe" element={
               <PrivateRoute>
                 <CreatePrescription />
+              </PrivateRoute>
+            } />
+            <Route path="/doctor/edit-prescription" element={
+              <PrivateRoute>
+                <EditPrescription />
               </PrivateRoute>
             } />
             <Route path="/doctor/reservations" element={
