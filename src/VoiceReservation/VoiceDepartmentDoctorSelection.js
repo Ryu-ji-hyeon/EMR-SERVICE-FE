@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
-import DepartmentSelector from './DepartmentSelector';
+import DepartmentSelector from '../Department/DepartmentSelector';
 import DoctorSelector from '../Doctor/DoctorSelector';
 import styled from 'styled-components';
 import { useSpeechSynthesis } from 'react-speech-kit';

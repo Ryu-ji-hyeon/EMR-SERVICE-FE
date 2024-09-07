@@ -8,7 +8,7 @@ import SignupForm from './Main/SignupForm';
 import DoctorSignup from './Doctor/DoctorSignup';
 import MemberSignup from './Member/MemberSignup';
 import Footer from './components/Footer';
-import DepartmentDoctorSelection from './Department/DepartmentDoctorSelection';
+import DepartmentDoctorSelection from './VoiceReservation/VoiceDepartmentDoctorSelection';
 import VoiceReservationSystem from './VoiceReservation/VoiceReservationSystem';
 import MemberDashboard from './Member/MemberDashboard';
 import DoctorDashboard from './Doctor/DoctorDashboard';
