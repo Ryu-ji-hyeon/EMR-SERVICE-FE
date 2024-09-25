@@ -224,7 +224,7 @@ const DepartmentDoctorSelection = () => {
           const doctorNames = response.data.map(docor => docor.doctorName).join(', ');
           // 의사 목록을 음성으로 안내
           speakQuestion(`선택한 ${selectedDept.deptName} 부서의 의사 목록은 다음과 같습니다: ${doctorNames}. 선택할 의사 이름을 말해주세요.`);
-          setCurrentStep(2);
+          navigate('/Voice/ReservationScreen');
         } else {
           speakQuestion(`선택한 ${selectedDept.deptName} 부서에는 현재 등록된 의사가 없습니다.`);
         }
