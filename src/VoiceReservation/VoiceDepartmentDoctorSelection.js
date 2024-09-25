@@ -110,6 +110,7 @@ const DepartmentDoctorSelection = () => {
     }
   }, []);
 
+  // 부서 목록 가져오기
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
@@ -200,12 +201,38 @@ const DepartmentDoctorSelection = () => {
     }
   };
 
-  const handleDepartmentSelection = (command) => {
+  // 의사 선택
+  const handleDepartmentSelection = async (command) => {
     const selectedDept = availableDepartments.find(dept => dept.deptName === command);
     if (selectedDept) {
       setSelectedDepartment(selectedDept.deptName);
-      speakQuestion(`${selectedDept.deptName} 부서를 선택하셨습니다. 의사 이름을 말해주세요.`);
-      setCurrentStep(2);
+      speakQuestion(`${selectedDept.deptName} 부서를 선택하셨습니다.`);
+  
+      // 선택된 부서에 해당하는 의사 목록 가져오기
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API_SERVER}/api/doctor/doctors`, {
+          params: { department: selectedDept.deptName },
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+            'X-XSRF-TOKEN': csrfToken
+          },
+          withCredentials: true
+        });
+  
+        // 의사 목록이 있는지 확인하고 음성으로 안내
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          const doctorNames = response.data.map(docor => docor.doctorName).join(', ');
+          // 의사 목록을 음성으로 안내
+          speakQuestion(`선택한 ${selectedDept.deptName} 부서의 의사 목록은 다음과 같습니다: ${doctorNames}. 선택할 의사 이름을 말해주세요.`);
+          setCurrentStep(2);
+        } else {
+          speakQuestion(`선택한 ${selectedDept.deptName} 부서에는 현재 등록된 의사가 없습니다.`);
+        }
+  
+      } catch (error) {
+        console.error('Error fetching doctors:', error);
+        speakQuestion('의사 목록을 불러오는 중 오류가 발생했습니다.');
+      }
     } else {
       speakQuestion('유효한 부서를 선택해주세요.');
     }
@@ -220,74 +247,6 @@ const DepartmentDoctorSelection = () => {
 
   const handleUserResponse = (response) => {
     handleVoiceCommand(response);
-  };
-
-  const parseDate = (response) => {
-    const [month, day] = response.match(/\d+/g);
-    const year = new Date().getFullYear();
-    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-  };
-
-  const parseTime = (response) => {
-    const time = response.match(/\d{1,2}/);
-    if (time) {
-      return `${time[0].padStart(2, '0')}:00`;
-    }
-    return null;
-  };
-
-  const askDateQuestion = () => {
-    const questionText = '몇월 며칠 예약할래?';
-    speakQuestion(questionText);
-    setCurrentStep(1);
-  };
-
-  const askTimeQuestion = () => {
-    const questionText = '몇시에 예약하시겠습니까?';
-    speakQuestion(questionText);
-    setCurrentStep(2);
-  };
-
-  const checkAvailability = (date, time) => {
-    const token = localStorage.getItem('accessToken');
-    axios.get(`${process.env.REACT_APP_API_SERVER}/api/check?date=${date}&time=${time}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      withCredentials: true
-    })
-      .then((response) => {
-        if (response.data.available) {
-          makeReservation(date, time);
-        } else {
-          speakQuestion('이미 예약이 있습니다. 다른 시간을 선택해주세요.');
-          setCurrentStep(2);
-        }
-      })
-      .catch((error) => {
-        console.error('Error checking availability:', error);
-        speakQuestion('예약 확인 중 오류가 발생했습니다. 다시 시도해주세요.');
-      });
-  };
-
-  const makeReservation = (date, time) => {
-    const token = localStorage.getItem('accessToken');
-    axios.post(`${process.env.REACT_APP_API_SERVER}/api/reserve`, null, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'X-XSRF-TOKEN': csrfToken
-      },
-      params: { date, time },
-      withCredentials: true
-    })
-      .then((response) => {
-        speakQuestion('예약이 확정되었습니다.');
-        setCurrentStep(4);
-      })
-      .catch((error) => {
-        console.error('Error making reservation:', error);
-        speakQuestion('예약 중 오류가 발생했습니다. 다시 시도해주세요.');
-      });
   };
 
   return (
