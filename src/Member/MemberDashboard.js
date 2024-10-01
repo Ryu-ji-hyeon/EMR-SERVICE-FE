@@ -53,7 +53,6 @@ const MemberDashboard = () => {
         <CardTitle>환자 대시보드</CardTitle>
         <NavLink to="/reservation-choice">예약하기</NavLink>
         <NavLink to="/member/reservations">예약 확인</NavLink>
-        <NavLink to="/member/prescriptions">처방전 확인</NavLink>
       </Content>
     </ScreenContainer>
   );

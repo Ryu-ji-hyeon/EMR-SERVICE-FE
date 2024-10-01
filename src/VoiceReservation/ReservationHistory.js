@@ -134,7 +134,7 @@ const ReservationHistory = () => {
                 <ReservationDetail><strong>날짜:</strong> {reservation.date}</ReservationDetail>
                 <ReservationDetail><strong>시간:</strong> {reservation.time}</ReservationDetail>
                 <ViewButton onClick={() => handleViewDetails(reservation.reservationId)}>
-                  자세히 보기
+                  처방전 보기
                 </ViewButton>
               </ReservationItem>
             ))
