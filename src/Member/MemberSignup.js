@@ -59,7 +59,7 @@ const Select = styled.select`
 
 const Button = styled.button`
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.35rem;
   background-color: #2260ff;
   border: none;
   border-radius: 4px;
@@ -67,7 +67,7 @@ const Button = styled.button`
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
-  margin-top: 1rem;
+  margin-top: 0.1rem;
 
   &:hover {
     background-color: #1c3faa;

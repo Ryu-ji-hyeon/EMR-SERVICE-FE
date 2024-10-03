@@ -1,60 +1,195 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import ScreenContainer from '../components/ScreenContainer';
-import Content from '../components/Content';
-import NavBar from '../components/NavBar'; // NavBar 컴포넌트 임포트
+import { FaCalendarCheck, FaPrescriptionBottleAlt, FaCalendarPlus, FaHome, FaUser, FaCog } from 'react-icons/fa';
 
+// 스타일 컴포넌트 정의
 const CardTitle = styled.h3`
   color: #333;
-  font-size: 1.5rem;
-  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  margin-bottom: 8rem;
+  text-align: center;
 
-  /* 반응형 디자인을 위한 미디어 쿼리 */
-  @media (max-width: 480px) {
-    font-size: 1.25rem;
-    text-align: center;
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
   }
 `;
 
 const NavLink = styled(Link)`
-  display: block;
-  margin-bottom: 1rem;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  color: #2260ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 5.5rem; /* 버튼 크기 조정: 세로 2rem, 가로 3rem */
+  font-size: 1.5rem; /* 폰트 크기를 1.5rem으로 조정 */
+  color: #fff;
   text-decoration: none;
-  background-color: #f9f9f9;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-  transition: background-color 0.3s;
+  background-color: #007bff;
+  border-radius: 12px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s, transform 0.2s;
+  width: 100%;
+  max-width: 350px; /* 버튼 최대 너비를 350px로 조정 */
 
   &:hover {
-    background-color: #f0f0f0;
+    background-color: #0056b3;
+    transform: translateY(-2px);
   }
 
-  /* 반응형 디자인을 위한 미디어 쿼리 */
+  svg {
+    margin-right: 12px; /* 아이콘과 텍스트 간의 간격 조정 */
+    font-size: 1.8rem; /* 아이콘 크기도 증가 */
+  }
+
   @media (max-width: 480px) {
-    font-size: 0.875rem;
-    padding: 0.5rem;
-    text-align: center;
+    font-size: 1.2rem;
+    padding: 1.5rem; /* 모바일 화면에서 크기 조정 */
   }
 `;
 
-const StyledNavBar = styled(NavBar)`
-  margin-bottom: 2rem;
+
+const CalendarTitle = styled.h4`
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
 `;
 
+const ScreenWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f1f4f8;
+  padding: 0 2rem;
+`;
+
+const BottomNavBar = styled.div`
+  width: 100%;
+  max-width: 980px;
+  height: 70px;
+  background-color: #ffffff;
+  border-top: 1px solid #ddd;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  margin-top: auto;
+`;
+
+const NavIcon = styled(Link)`
+  font-size: 1.5rem;
+  color: #007bff;
+  text-decoration: none;
+  text-align: center;
+
+  &:hover {
+    color: #0056b3;
+  }
+
+  span {
+    font-size: 0.85rem;
+    display: block;
+    margin-top: 4px;
+    color: #333;
+  }
+
+  @media (min-width: 768px) {
+    font-size: 1.3rem;
+    span {
+      font-size: 1.1rem;
+    }
+  }
+`;
+
+const MainContent = styled.div`
+  width: 100%;
+  max-width: 980px;
+  height: 100vh; /* 화면 전체 높이를 차지하도록 설정 */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* 요소들을 위아래로 배치 */
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 2rem; /* padding을 조정하여 공간 최적화 */
+`;
+
+const Content = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-grow: 1;
+  justify-content: center; /* 요소들이 중앙에 위치하도록 조정 */
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8rem; /* 버튼 간의 간격을 줄임 */
+  margin-bottom: 6rem; /* CalendarContainer와의 간격 조정 */
+`;
+
+const CalendarContainer = styled.div`
+  width: 100%;
+  max-width: 700px;
+  margin-top: 0; /* 위 요소와의 간격을 없앰 */
+  padding: 2rem;
+  border: 1px solid #ddd;
+  border-radius: 16px;
+  background-color: #f9f9f9;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+`;
 const MemberDashboard = () => {
   return (
-    <ScreenContainer>
-      <Content>
-        
-        <CardTitle>환자 대시보드</CardTitle>
-        <NavLink to="/reservation-choice">예약하기</NavLink>
-        <NavLink to="/member/reservations">예약 확인</NavLink>
-      </Content>
-    </ScreenContainer>
+    <ScreenWrapper>
+      <MainContent>
+        <Content>
+          <CardTitle>환자 대시보드</CardTitle>
+          <ButtonContainer>
+            <NavLink to="/reservation-choice">
+              <FaCalendarPlus />
+              예약하기
+            </NavLink>
+            <NavLink to="/member/reservations">
+              <FaCalendarCheck />
+              예약 확인
+            </NavLink>
+            <NavLink to="/prescriptions">
+              <FaPrescriptionBottleAlt />
+              처방전 확인
+            </NavLink>
+          </ButtonContainer>
+          <CalendarContainer>
+            <CalendarTitle>예약 일정</CalendarTitle>
+            <p>현재 예약된 일정이 없습니다.</p>
+          </CalendarContainer>
+        </Content>
+        <BottomNavBar>
+          <NavIcon to="/member/dashboard">
+            <FaHome />
+            <span>홈</span>
+          </NavIcon>
+          <NavIcon to="/reservation-choice">
+            <FaCalendarCheck />
+            <span>예약</span>
+          </NavIcon>
+          <NavIcon to="/profile">
+            <FaUser />
+            <span>프로필</span>
+          </NavIcon>
+          <NavIcon to="/">
+            <FaCog />
+            <span>로그아웃</span>
+          </NavIcon>
+        </BottomNavBar>
+      </MainContent>
+    </ScreenWrapper>
   );
 };
 

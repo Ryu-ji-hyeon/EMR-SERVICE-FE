@@ -7,6 +7,7 @@ import AvailableTimes from '../StandardReservation/AvailableTimes';
 import { jwtDecode } from 'jwt-decode';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { FaHome, FaCalendarCheck, FaUser, FaCog, FaArrowLeft } from 'react-icons/fa';
 
 const Title = styled.h1`
   text-align: center;
@@ -75,6 +76,91 @@ const Transcript = styled.p`
   word-break: break-word;
 `;
 
+const MainContent = styled.div`
+  width: 100%;
+  max-width: 980px;
+  min-height: 100vh; /* 높이 설정을 화면 전체로 */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* 상단부터 배치 */
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20rem 2rem;
+  overflow: visible; /* 요소 잘리지 않도록 설정 */
+  position: relative;
+`;
+
+// NavIcon 스타일 정의
+const NavIcon = styled.div`
+  font-size: 1.5rem;
+  color: #007bff;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+
+  &:hover {
+    color: #0056b3;
+  }
+
+  span {
+    font-size: 0.85rem;
+    display: block;
+    margin-top: 4px;
+    color: #333;
+  }
+
+  @media (min-width: 768px) {
+    font-size: 1.3rem;
+    span {
+      font-size: 1.1rem;
+    }
+  }
+`;
+
+// BottomNavBar 스타일 정의
+const BottomNavBar = styled.div`
+  width: 100%;
+  max-width: 980px;
+  height: 70px;
+  background-color: #ffffff;
+  border-top: 1px solid #ddd;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
+  position: fixed; /* 화면 하단에 고정 */
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+`;
+
+// BackButton 스타일 정의
+const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  font-size: 1.5rem;
+  color: #007bff;
+  background-color: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 100;
+
+  &:hover {
+    background-color: #e6e6e6;
+  }
+`;
+
 const VoiceReservationSystem = () => {
   const { speak, cancel } = useSpeechSynthesis();
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
@@ -88,6 +174,10 @@ const VoiceReservationSystem = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [recognizedText, setRecognizedText] = useState(''); // 인식된 텍스트
+
+  const handleGoBack = () => {
+    navigate('/Voice/DepartmentDoctorSelection'); // ReservationChoice로 이동
+  };
 
   useEffect(() => {
     const fetchCsrfToken = async () => {
@@ -300,9 +390,14 @@ const handleTimeClick = (time) => {
 
   return (
     <ReservationContainer>
+       <MainContent>
+         {/* 뒤로 가기 버튼 추가 */}
+         <BackButton onClick={handleGoBack}>
+          <FaArrowLeft />
+        </BackButton>
       <Title>음성 인식 예약 시스템</Title>
 	
-<CalendarContainer>
+      <CalendarContainer>
       <ResulvationCalender 
               onDateClick={handleDateClick} 
               fullyBookedDates={fullyBookedDates}
@@ -322,6 +417,27 @@ const handleTimeClick = (time) => {
         <Button onClick={startVoiceReservation}>음성 예약 시작</Button>
         <Button onClick={handleStopListening}>응답 종료</Button>
       </ControlPanelContainer>
+
+      {/* 하단 네비게이션 바 추가 */}
+      <BottomNavBar>
+          <NavIcon onClick={() => navigate('/member/dashboard')}>
+            <FaHome />
+            <span>홈</span>
+          </NavIcon>
+          <NavIcon onClick={() => navigate('/reservation-choice')}>
+            <FaCalendarCheck />
+            <span>예약</span>
+          </NavIcon>
+          <NavIcon onClick={() => navigate('/profile')}>
+            <FaUser />
+            <span>프로필</span>
+          </NavIcon>
+          <NavIcon onClick={() => navigate('/')}>
+            <FaCog />
+            <span>로그아웃</span>
+          </NavIcon>
+        </BottomNavBar>
+      </MainContent>
     </ReservationContainer>
   );
 };

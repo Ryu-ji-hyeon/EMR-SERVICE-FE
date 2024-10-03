@@ -9,71 +9,118 @@ import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognitio
 import { jwtDecode } from 'jwt-decode';
 import ScreenContainer from '../components/ScreenContainer';
 import Content from '../components/Content';
+import { FaHome, FaCalendarCheck, FaUser, FaCog, FaArrowLeft } from 'react-icons/fa';
 
+// 스타일 정의
 const Title = styled.h1`
   text-align: center;
   margin-bottom: 1.5rem;
   color: #333;
+  font-size: 1.5rem;
 
-  /* 반응형 디자인을 위한 미디어 쿼리 */
   @media (max-width: 480px) {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     margin-bottom: 1rem;
   }
 `;
 
 const Card = styled.div`
-  padding: 2rem;
+  padding: 10rem;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
 
-  /* 반응형 디자인을 위한 미디어 쿼리 */
   @media (max-width: 480px) {
     padding: 1rem;
   }
 `;
 
-const Button = styled.button`
+const MainContent = styled.div`
   width: 100%;
+  max-width: 980px;
+  min-height: 100vh; /* 높이 설정을 화면 전체로 */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* 상단부터 배치 */
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20rem 2rem;
+  overflow: visible; /* 요소 잘리지 않도록 설정 */
+  position: relative;
+`;
+
+// BackButton 스타일 정의
+const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 0.75rem;
-  font-size: 1.25rem;
-  color: #fff;
+  font-size: 1.5rem;
+  color: #007bff;
+  background-color: transparent;
   border: none;
-  border-radius: 4px;
+  border-radius: 50%;
   cursor: pointer;
-  background-color: #2260ff;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, color 0.3s;
+
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 100;
 
   &:hover {
-    background-color: #1c3faa;
-  }
-
-  /* 반응형 디자인을 위한 미디어 쿼리 */
-  @media (max-width: 480px) {
-    font-size: 1rem;
-    padding: 0.5rem;
+    background-color: #e6e6e6;
   }
 `;
 
-const ResponseList = styled.ul`
-  list-style-type: none;
-  padding: 0;
+// BottomNavBar 스타일 정의
+const BottomNavBar = styled.div`
+  width: 100%;
+  max-width: 980px;
+  height: 70px;
+  background-color: #ffffff;
+  border-top: 1px solid #ddd;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
+  position: fixed; /* 화면 하단에 고정 */
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+`;
 
-  li {
-    background-color: #f9f9f9;
-    margin-bottom: 0.5rem;
-    padding: 0.75rem;
-    border-radius: 4px;
-    border: 1px solid #ddd;
+// NavIcon 스타일 정의
+const NavIcon = styled.div`
+  font-size: 1.5rem;
+  color: #007bff;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
 
-    /* 반응형 디자인을 위한 미디어 쿼리 */
-    @media (max-width: 480px) {
-      font-size: 0.875rem;
-      padding: 0.5rem;
+  &:hover {
+    color: #0056b3;
+  }
+
+  span {
+    font-size: 0.85rem;
+    display: block;
+    margin-top: 4px;
+    color: #333;
+  }
+
+  @media (min-width: 768px) {
+    font-size: 1.3rem;
+    span {
+      font-size: 1.1rem;
     }
   }
 `;
+
 
 const DepartmentDoctorSelection = () => {
   const [selectedDepartment, setSelectedDepartment] = useState('');
@@ -89,6 +136,10 @@ const DepartmentDoctorSelection = () => {
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleGoBack = () => {
+    navigate('/reservation-choice'); // ReservationChoice로 이동
+  };
 
   useEffect(() => {
     const fetchCsrfToken = async () => {
@@ -292,15 +343,40 @@ const DepartmentDoctorSelection = () => {
 
   return (
     <ScreenContainer>
-      <Content>
+      <MainContent>
+        {/* 뒤로 가기 버튼 추가 */}
+        <BackButton onClick={handleGoBack}>
+          <FaArrowLeft />
+        </BackButton>
+        
         <Title>일반 예약 시스템</Title>
-        <Card>
+         <Card>
           <DepartmentSelector onSelect={handleDepartmentSelect} />
           {selectedDepartment && (
             <DoctorSelector department={selectedDepartment} onSelect={handleDoctorSelect} />
           )}
         </Card>
-      </Content>
+     
+        {/* 하단 네비게이션 바 추가 */}
+        <BottomNavBar>
+          <NavIcon onClick={() => navigate('/member/dashboard')}>
+            <FaHome />
+            <span>홈</span>
+          </NavIcon>
+          <NavIcon onClick={() => navigate('/reservation-choice')}>
+            <FaCalendarCheck />
+            <span>예약</span>
+          </NavIcon>
+          <NavIcon onClick={() => navigate('/profile')}>
+            <FaUser />
+            <span>프로필</span>
+          </NavIcon>
+          <NavIcon onClick={() => navigate('/')}>
+            <FaCog />
+            <span>로그아웃</span>
+          </NavIcon>
+        </BottomNavBar>
+      </MainContent>
     </ScreenContainer>
   );
 };
