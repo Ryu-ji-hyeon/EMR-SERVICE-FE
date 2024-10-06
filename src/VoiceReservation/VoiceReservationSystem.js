@@ -395,7 +395,7 @@ const handleTimeClick = (time) => {
          <BackButton onClick={handleGoBack}>
           <FaArrowLeft />
         </BackButton>
-      <Title>음성 인식 예약 시스템</Title>
+      <Title>음성 진료 예약 시스템</Title>
 	
       <CalendarContainer>
       <ResulvationCalender 
