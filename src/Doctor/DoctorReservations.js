@@ -3,10 +3,11 @@ import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import ScreenContainer from '../components/ScreenContainer';
 import Content from '../components/Content';
 import { FaHome, FaCalendarCheck, FaUser, FaCog, FaArrowLeft } from 'react-icons/fa';
-
 
 const Title = styled.h2`
   color: #333;
@@ -18,7 +19,7 @@ const Title = styled.h2`
 const ReservationList = styled.ul`
   list-style: none;
   padding: 0;
-  margin: 0;ㄴ
+  margin: 0;
 `;
 
 const ReservationItem = styled.li`
@@ -80,19 +81,25 @@ const NoReservationsMessage = styled.p`
   color: #999;
 `;
 
+const DatePickerWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+`;
+
 const MainContent = styled.div`
   width: 100%;
   max-width: 980px;
-  min-height: 100vh; /* 높이 설정을 화면 전체로 */
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* 상단부터 배치 */
+  justify-content: flex-start;
   align-items: center;
   background-color: #ffffff;
   border-radius: 16px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 20rem 2rem;
-  overflow: visible; /* 요소 잘리지 않도록 설정 */
+  padding: 5rem 2rem;
+  overflow: visible;
   position: relative;
 `;
 
@@ -131,7 +138,7 @@ const BottomNavBar = styled.div`
   justify-content: space-around;
   align-items: center;
   box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
-  position: fixed; /* 화면 하단에 고정 */
+  position: fixed;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
@@ -169,10 +176,11 @@ const DoctorReservations = () => {
   const [csrfToken, setCsrfToken] = useState('');
   const [doctorId, setDoctorId] = useState(null);
   const [reservations, setReservations] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const navigate = useNavigate();
 
   const handleGoBack = () => {
-    navigate('/doctor/dashboard'); // ReservationChoice로 이동
+    navigate('/doctor/dashboard');
   };
 
   useEffect(() => {
@@ -191,69 +199,93 @@ const DoctorReservations = () => {
             withCredentials: true,
           });
           setDoctorId(doctorResponse.data);
-
-          fetchReservations(doctorResponse.data, csrfResponse.data.token);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
 
-    const fetchReservations = async (doctorId, csrfToken) => {
-      try {
-        const response = await axios.get(`${process.env.REACT_APP_API_SERVER}/api/reservations/doctor/${doctorId}`, {
-          headers: {
-            'X-XSRF-TOKEN': csrfToken,
-          },
-          withCredentials: true,
-        });
-
-        if (Array.isArray(response.data)) {
-          const reservationsWithStatus = await Promise.all(
-            response.data.map(async (reservation) => {
-              const prescriptionStatus = await fetchPrescriptionStatus(reservation.reservationId);
-              return { ...reservation, isPrescribed: prescriptionStatus };
-            })
-          );
-          setReservations(reservationsWithStatus);
-        } else {
-          console.error('Unexpected response format:', response.data);
-        }
-      } catch (error) {
-        console.error('Error fetching reservations:', error);
-      }
-    };
-
-    const fetchPrescriptionStatus = async (reservationId) => {
-      try {
-        const response = await axios.get(`${process.env.REACT_APP_API_SERVER}/api/prescriptions/status/${reservationId}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-            'X-XSRF-TOKEN': csrfToken,
-          },
-          withCredentials: true,
-        });
-        return response.data; // true if prescribed, false otherwise
-      } catch (error) {
-        console.error('Error checking prescription status:', error);
-        return false;
-      }
-    };
-
     fetchCsrfTokenAndDoctorId();
   }, []);
 
-  const handlePrescriptionClick = (reservationId, isPrescribed) => {
+  useEffect(() => {
+    if (doctorId && selectedDate) {
+      fetchReservationsByDate();
+    }
+  }, [doctorId, selectedDate]);
+
+  const fetchReservationsByDate = async () => {
+    try {
+      const formattedDate = selectedDate.toISOString().split('T')[0];
+      const response = await axios.get(`${process.env.REACT_APP_API_SERVER}/api/reservations/doctor/${doctorId}/date`, {
+        params: { date: formattedDate },
+        headers: { 'X-XSRF-TOKEN': csrfToken },
+        withCredentials: true,
+      });
+      
+      const reservationsWithStatus = await Promise.all(
+        response.data.map(async (reservation) => {
+          const prescriptionStatus = await fetchPrescriptionStatus(reservation.reservationId);
+          return { ...reservation, isPrescribed: prescriptionStatus };
+        })
+      );
+      setReservations(reservationsWithStatus);
+    } catch (error) {
+      console.error('Error fetching reservations:', error);
+    }
+  };
+
+  const fetchPrescriptionStatus = async (reservationId) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_API_SERVER}/api/prescriptions/status/${reservationId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          'X-XSRF-TOKEN': csrfToken,
+        },
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error checking prescription status:', error);
+      return false;
+    }
+  };
+
+  const handlePrescriptionClick = async (reservationId, isPrescribed) => {
     if (!reservationId) {
       console.error('Invalid reservation ID:', reservationId);
       return;
     }
-    console.log('Navigating with Reservation ID:', reservationId);
+
     if (!isPrescribed) {
       navigate('/doctor/prescribe', { state: { reservationId } });
-    }
-    else{
+    } else {
       navigate('/reservation/details', { state: { reservationId } });
+    }
+
+    // 처방 상태 업데이트
+    await updateReservationStatus(reservationId);
+  };
+
+  const updateReservationStatus = async (reservationId) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_API_SERVER}/api/prescriptions/status/${reservationId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          'X-XSRF-TOKEN': csrfToken,
+        },
+        withCredentials: true,
+      });
+
+      if (response.data) {
+        setReservations((prevReservations) =>
+          prevReservations.map((reservation) =>
+            reservation.reservationId === reservationId ? { ...reservation, isPrescribed: response.data } : reservation
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error updating prescription status:', error);
     }
   };
 
@@ -264,30 +296,31 @@ const DoctorReservations = () => {
   return (
     <ScreenContainer>
       <MainContent>
-        {/* 뒤로 가기 버튼 추가 */}
         <BackButton onClick={handleGoBack}>
           <FaArrowLeft />
         </BackButton>
-      <Content>
-        <Title>예약된 환자 목록</Title>
-        {reservations.length > 0 ? (
-          <ReservationList>
-            {reservations.map((reservation) => {
-              const reservationDateTime = new Date(`${reservation.date}T${reservation.time}`);
+        <Content>
+          <Title>날짜별 예약 환자 목록</Title>
 
-              if (!reservation.reservationId) {
-                console.error('Reservation ID is missing:', reservation);
-              }
+          <DatePickerWrapper>
+            <DatePicker
+              selected={selectedDate}
+              onChange={(date) => setSelectedDate(date)}
+              dateFormat="yyyy-MM-dd"
+              inline
+            />
+          </DatePickerWrapper>
 
-              return (
+          {reservations.length > 0 ? (
+            <ReservationList>
+              {reservations.map((reservation) => (
                 <ReservationItem key={reservation.reservationId}>
                   <div>
                     <ReservationDetail>
                       <strong>환자 이름:</strong> {reservation.patientName}
                     </ReservationDetail>
                     <ReservationDetail>
-                      <strong>예약 시간:</strong> {reservationDateTime.toLocaleDateString()}{' '}
-                      {reservationDateTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      <strong>예약 시간:</strong> {reservation.time}
                     </ReservationDetail>
                   </div>
                   <div>
@@ -302,28 +335,27 @@ const DoctorReservations = () => {
                     )}
                   </div>
                 </ReservationItem>
-              );
-            })}
-          </ReservationList>
-        ) : (
-          <NoReservationsMessage>예약된 환자가 없습니다.</NoReservationsMessage>
-        )}
-      </Content>
+              ))}
+            </ReservationList>
+          ) : (
+            <NoReservationsMessage>선택한 날짜에 예약된 환자가 없습니다.</NoReservationsMessage>
+          )}
+        </Content>
 
-      <BottomNavBar>
-          <NavIcon to="/doctor/dashboard">
+        <BottomNavBar>
+          <NavIcon onClick={() => navigate('/doctor/dashboard')}>
             <FaHome />
             <span>홈</span>
           </NavIcon>
-          <NavIcon to="/doctor/reservations">
+          <NavIcon onClick={() => navigate('/doctor/reservations')}>
             <FaCalendarCheck />
             <span>예약 확인</span>
           </NavIcon>
-          <NavIcon to="/profile">
+          <NavIcon onClick={() => navigate('/profile')}>
             <FaUser />
             <span>프로필</span>
           </NavIcon>
-          <NavIcon to="/">
+          <NavIcon onClick={() => navigate('/')}>
             <FaCog />
             <span>로그아웃</span>
           </NavIcon>
