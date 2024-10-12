@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';  
 import styled from 'styled-components';
-import { FaGoogle, FaLeaf, FaComment } from 'react-icons/fa'; 
+import { FaGoogle, FaLeaf, FaComment } from 'react-icons/fa';
 import ScreenContainer from '../components/ScreenContainer';
 import Content from '../components/Content';
-
+import { FaHome, FaCalendarCheck, FaUser, FaCog, FaArrowLeft } from 'react-icons/fa';
+// 스타일 컴포넌트 정의
 const FormGroup = styled.div`
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   width: 100%;
 `;
 
@@ -21,8 +22,7 @@ const RadioGroup = styled.div`
   display: flex;
   justify-content: center;
   margin-bottom: 1.5rem;
-  
-  /* 반응형 디자인을 위한 미디어 쿼리 */
+
   @media (max-width: 480px) {
     flex-direction: column;
     align-items: center;
@@ -36,7 +36,6 @@ const RadioLabel = styled.label`
   display: flex;
   align-items: center;
 
-  /* 반응형 디자인을 위한 미디어 쿼리 */
   @media (max-width: 480px) {
     margin: 0.5rem 0;
   }
@@ -54,21 +53,20 @@ const ErrorMessage = styled.div`
 
 const Button = styled.button`
   width: 100%;
-  padding: 0.75rem;
+  padding: 1.2rem;
   background-color: #2260ff;
   border: none;
   border-radius: 4px;
   color: white;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: bold;
   cursor: pointer;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
 
   &:hover {
     background-color: #1c3faa;
   }
 
-  /* 반응형 디자인을 위한 미디어 쿼리 */
   @media (max-width: 480px) {
     font-size: 0.875rem;
     padding: 0.5rem;
@@ -113,7 +111,6 @@ const SocialLoginContainer = styled.div`
       margin-right: 0.5rem;
     }
 
-    /* 반응형 디자인을 위한 미디어 쿼리 */
     @media (max-width: 480px) {
       font-size: 0.875rem;
       padding: 0.5rem;
@@ -135,6 +132,61 @@ const CardFooter = styled.div`
     &:hover {
       text-decoration: underline;
     }
+  }
+`;
+
+const ScreenWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f1f4f8;
+  padding: 0 2rem;
+`;
+
+const MainContent = styled.div`
+  width: 100%;
+  max-width: 980px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 2rem;
+  overflow: visible;
+  position: relative;
+`;
+
+const LoginFormWrapper = styled.div`
+  width: 100%;
+  max-width: 600px;
+  padding: 2rem;
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 1px;
+`;
+
+const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  font-size: 1.5rem;
+  color: #007bff;
+  background-color: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 100;
+
+  &:hover {
+    background-color: #e6e6e6;
   }
 `;
 
@@ -161,9 +213,16 @@ const SignupForm = () => {
     }
   };
 
+  const handleGoBack = () => {
+    navigate('/home/loginForm');
+  };
   return (
-    <ScreenContainer>
-      <Content>
+    <ScreenWrapper>
+      <MainContent>
+      <BackButton onClick={handleGoBack}>
+          <FaArrowLeft />
+        </BackButton>
+      <LoginFormWrapper>
         <h3>회원가입</h3>
         <form onSubmit={handleSubmit}>
           <FormGroup>
@@ -207,8 +266,9 @@ const SignupForm = () => {
             </a>
           </SocialLoginContainer>
         </CardFooter>
-      </Content>
-    </ScreenContainer>
+        </LoginFormWrapper>
+      </MainContent>
+    </ScreenWrapper>
   );
 };
 

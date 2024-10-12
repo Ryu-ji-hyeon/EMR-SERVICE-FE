@@ -4,6 +4,8 @@ import axios from 'axios';
 import styled from 'styled-components';
 import ScreenContainer from '../components/ScreenContainer';
 import Content from '../components/Content';
+import { FaHome, FaCalendarCheck, FaUser, FaCog, FaArrowLeft } from 'react-icons/fa';
+
 
 const FormGroup = styled.div`
   margin-bottom: 1rem;
@@ -19,11 +21,11 @@ const Label = styled.label`
 
 const Input = styled.input`
   width: 100%;
-  padding: 0.75rem;
+  padding: 1rem;
   border-radius: 4px;
   border: 1px solid #ddd;
   background-color: #f9f9f9;
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: #333;
 
   &:focus {
@@ -31,7 +33,6 @@ const Input = styled.input`
     border-color: #2260ff;
   }
 
-  /* 반응형 디자인을 위한 미디어 쿼리 */
   @media (max-width: 480px) {
     font-size: 0.875rem;
   }
@@ -39,11 +40,11 @@ const Input = styled.input`
 
 const Select = styled.select`
   width: 100%;
-  padding: 0.75rem;
+  padding: 1rem;
   border-radius: 4px;
   border: 1px solid #ddd;
   background-color: #f9f9f9;
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: #333;
 
   &:focus {
@@ -51,33 +52,74 @@ const Select = styled.select`
     border-color: #2260ff;
   }
 
-  /* 반응형 디자인을 위한 미디어 쿼리 */
   @media (max-width: 480px) {
     font-size: 0.875rem;
   }
 `;
+const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  font-size: 1.5rem;
+  color: #007bff;
+  background-color: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 100;
 
+  &:hover {
+    background-color: #e6e6e6;
+  }
+`;
 const Button = styled.button`
   width: 100%;
-  padding: 0.75rem;
+  padding: 1.2rem;
   background-color: #2260ff;
   border: none;
   border-radius: 4px;
   color: white;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: bold;
   cursor: pointer;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
 
   &:hover {
     background-color: #1c3faa;
   }
 
-  /* 반응형 디자인을 위한 미디어 쿼리 */
   @media (max-width: 480px) {
     font-size: 0.875rem;
-    padding: 0.5rem;
+    padding: 0.75rem;
   }
+`;
+
+const MainContent = styled.div`
+  width: 100%;
+  max-width: 980px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 2rem;
+  overflow: visible;
+  position: relative;
+`;
+
+const LoginFormWrapper = styled.div`
+  width: 100%;
+  max-width: 600px;
+  padding: 2rem;
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 1px;
 `;
 
 const DoctorSignup = () => {
@@ -129,10 +171,17 @@ const DoctorSignup = () => {
         alert('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
       });
   };
+  const handleGoBack = () => {
+    navigate('/home/choiceMember');
+  };
 
   return (
     <ScreenContainer>
-      <Content>
+      <MainContent>
+      <BackButton onClick={handleGoBack}>
+          <FaArrowLeft />
+        </BackButton>
+      <LoginFormWrapper>
         <h3>의사 회원가입</h3>
         <form onSubmit={handleSubmit}>
           <FormGroup>
@@ -190,7 +239,8 @@ const DoctorSignup = () => {
           </FormGroup>
           <Button type="submit">회원가입</Button>
         </form>
-      </Content>
+        </LoginFormWrapper>
+      </MainContent>
     </ScreenContainer>
   );
 };

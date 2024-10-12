@@ -3,13 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styled from 'styled-components';
 import { useAuth } from '../context/AuthContext';
-import { FaGoogle, FaLeaf, FaComment } from 'react-icons/fa'; // react-icons에서 아이콘 가져오기
-import ScreenContainer from '../components/ScreenContainer';
-import Content from '../components/Content';
+import { FaGoogle, FaLeaf, FaComment } from 'react-icons/fa';
 
-// 스타일 컴포넌트 정의
 const FormGroup = styled.div`
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   width: 100%;
 `;
 
@@ -26,7 +23,7 @@ const Select = styled.select`
   border-radius: 4px;
   border: 1px solid #ddd;
   background-color: #f9f9f9;
-  font-size: 1rem;
+  font-size: 1.1rem; /* 입력 크기 약간 증가 */
   color: #333;
 
   &:focus {
@@ -37,11 +34,11 @@ const Select = styled.select`
 
 const Input = styled.input`
   width: 100%;
-  padding: 0.75rem;
+  padding: 1rem;
   border-radius: 4px;
   border: 1px solid #ddd;
   background-color: #f9f9f9;
-  font-size: 1rem;
+  font-size: 1.1rem; /* 입력 크기 약간 증가 */
   color: #333;
 
   &:focus {
@@ -58,15 +55,15 @@ const ErrorMessage = styled.div`
 
 const Button = styled.button`
   width: 100%;
-  padding: 0.75rem;
+  padding: 1.2rem;
   background-color: #2260ff;
   border: none;
   border-radius: 4px;
   color: white;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: bold;
   cursor: pointer;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
 
   &:hover {
     background-color: #1c3faa;
@@ -130,7 +127,6 @@ const CardFooter = styled.div`
   }
 `;
 
-// 모달 컴포넌트 스타일 정의
 const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
@@ -169,12 +165,45 @@ const ModalButton = styled.button`
   }
 `;
 
+const ScreenWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f1f4f8;
+  padding: 0 2rem;
+`;
+
+const MainContent = styled.div`
+  width: 100%;
+  max-width: 980px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 2rem;
+  overflow: visible;
+  position: relative;
+`;
+
+const LoginFormWrapper = styled.div`
+  width: 100%;
+  max-width: 600px;
+  padding: 2rem;
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 1px;
+`;
+
 const LoginForm = () => {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [loginType, setLoginType] = useState('member');
   const [errorMessage, setErrorMessage] = useState('');
   const [csrfToken, setCsrfToken] = useState('');
-  const [showModal, setShowModal] = useState(false); // 모달 상태 관리
+  const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
   const { handleLogin } = useAuth();
 
@@ -202,18 +231,16 @@ const LoginForm = () => {
       const response = await handleLogin(credentials.username, credentials.password, loginType, csrfToken);
 
       console.log('로그인 성공:', response);
-      setShowModal(true); // 로그인 성공 시 모달을 표시
+      setShowModal(true); 
     } catch (error) {
       console.error('로그인 실패:', error);
       setErrorMessage('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
     }
   };
 
-  // 모달 닫기 및 페이지 이동 핸들러
   const handleModalClose = () => {
     setShowModal(false);
 
-    // 사용자의 역할에 따라 페이지 이동
     if (loginType === 'member') {
       navigate(`/member/dashboard`);
     } else if (loginType === 'doctor') {
@@ -222,71 +249,72 @@ const LoginForm = () => {
   };
 
   return (
-    <ScreenContainer>
-      <Content>
-        <h3>로그인</h3>
-        <form onSubmit={handleSubmit}>
-          <FormGroup>
-            <Label htmlFor="loginType">로그인 유형</Label>
-            <Select id="loginType" value={loginType} onChange={handleLoginTypeChange}>
-              <option value="member">회원 로그인</option>
-              <option value="doctor">의사 로그인</option>
-            </Select>
-          </FormGroup>
-          <FormGroup>
-            <Label htmlFor="username">아이디</Label>
-            <Input
-              type="text"
-              id="username"
-              name="username"
-              placeholder="아이디"
-              value={credentials.username}
-              onChange={handleChange}
-              required
-            />
-          </FormGroup>
-          <FormGroup>
-            <Label htmlFor="password">비밀번호</Label>
-            <Input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="비밀번호"
-              value={credentials.password}
-              onChange={handleChange}
-              required
-            />
-          </FormGroup>
-          {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
-          <Button type="submit">로그인</Button>
-        </form>
-        <CardFooter>
-          아직 회원이 아니신가요? <StyledLink to="/home/choiceMember">회원가입</StyledLink>
-          <SocialLoginContainer>
-            <a href="http://localhost:8080/oauth2/callback/google">
-              <FaGoogle /> Google
-            </a>
-            <a href="http://localhost:8080/oauth2/callback/naver">
-              <FaLeaf /> Naver
-            </a>
-            <a href="http://localhost:8080/oauth2/callback/kakao">
-              <FaComment /> Kakao
-            </a>
-          </SocialLoginContainer>
-        </CardFooter>
-      </Content>
+    <ScreenWrapper>
+      <MainContent>
+        <LoginFormWrapper>
+          <h3>로그인</h3>
+          <form onSubmit={handleSubmit}>
+            <FormGroup>
+              <Label htmlFor="loginType">로그인 유형</Label>
+              <Select id="loginType" value={loginType} onChange={handleLoginTypeChange}>
+                <option value="member">회원 로그인</option>
+                <option value="doctor">의사 로그인</option>
+              </Select>
+            </FormGroup>
+            <FormGroup>
+              <Label htmlFor="username">아이디</Label>
+              <Input
+                type="text"
+                id="username"
+                name="username"
+                placeholder="아이디"
+                value={credentials.username}
+                onChange={handleChange}
+                required
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label htmlFor="password">비밀번호</Label>
+              <Input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="비밀번호"
+                value={credentials.password}
+                onChange={handleChange}
+                required
+              />
+            </FormGroup>
+            {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
+            <Button type="submit">로그인</Button>
+          </form>
+          <CardFooter>
+            아직 회원이 아니신가요? <StyledLink to="/home/choiceMember">회원가입</StyledLink>
+            <SocialLoginContainer>
+              <a href="http://localhost:8080/oauth2/callback/google">
+                <FaGoogle /> Google
+              </a>
+              <a href="http://localhost:8080/oauth2/callback/naver">
+                <FaLeaf /> Naver
+              </a>
+              <a href="http://localhost:8080/oauth2/callback/kakao">
+                <FaComment /> Kakao
+              </a>
+            </SocialLoginContainer>
+          </CardFooter>
+        </LoginFormWrapper>
 
-      {/* 모달 표시 */}
-      {showModal && (
-        <ModalOverlay>
-          <ModalContainer>
-            <h3>로그인 성공!</h3>
-            <p>로그인이 성공적으로 완료되었습니다.</p>
-            <ModalButton onClick={handleModalClose}>확인</ModalButton>
-          </ModalContainer>
-        </ModalOverlay>
-      )}
-    </ScreenContainer>
+        {showModal && (
+          <ModalOverlay>
+            <ModalContainer>
+              <h3>로그인 성공!</h3>
+              <p>로그인이 성공적으로 완료되었습니다.</p>
+              <ModalButton onClick={handleModalClose}>확인</ModalButton>
+            </ModalContainer>
+          </ModalOverlay>
+        )}
+      </MainContent>
+    </ScreenWrapper>
   );
 };
 
