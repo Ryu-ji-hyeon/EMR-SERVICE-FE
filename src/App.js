@@ -23,6 +23,12 @@ import DoctorReservations from './Doctor/DoctorReservations';
 import ReservationDetails from './VoiceReservation/ReservationDetails';
 import StandardDepartmentDoctorSelector from './Department/StandardDepartmentDoctorSelector';
 import EditPrescription from './Doctor/EditPrescription';
+import MemberProfile from './Member/MemberProfile';
+import MemberEdit from './Member/MemberEdit';
+import MemberUpdatePassword from './Member/MemberUpdatePassword';
+import MemberDelete from './Member/MemberDelete';
+
+
 
 function App() {
   return (
@@ -54,6 +60,26 @@ function App() {
           <Route path="/member/prescriptions" element={
             <PrivateRoute>
               <ViewPrescriptions />
+            </PrivateRoute>
+          } />
+           <Route path="/member/profile" element={
+            <PrivateRoute>
+              <MemberProfile />
+            </PrivateRoute>
+          } />
+           <Route path="/member/edit" element={
+            <PrivateRoute>
+              <MemberEdit />
+            </PrivateRoute>
+          } />
+          <Route path="/member/memberupdatepassword" element={
+            <PrivateRoute>
+              <MemberUpdatePassword />
+            </PrivateRoute>
+          } />
+           <Route path="/member/delete" element={
+            <PrivateRoute>
+              <MemberDelete />
             </PrivateRoute>
           } />
             <Route path="/doctor/dashboard" element={
