@@ -73,8 +73,11 @@ const BottomNavBar = styled.div`
   justify-content: space-around;
   align-items: center;
   box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
-  position: relative;
-  margin-top: auto;
+  position: fixed; /* 화면 하단에 고정 */
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
 `;
 
 const NavIcon = styled(Link)`
@@ -105,15 +108,15 @@ const NavIcon = styled(Link)`
 const MainContent = styled.div`
   width: 100%;
   max-width: 980px;
-  height: 100vh; /* 화면 전체 높이를 차지하도록 설정 */
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* 요소들을 위아래로 배치 */
+  justify-content: center;
   align-items: center;
   background-color: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 2rem; /* padding을 조정하여 공간 최적화 */
+  padding: 2rem;
+  overflow: visible;
+  position: relative;
 `;
 
 const Content = styled.div`
@@ -179,7 +182,7 @@ const MemberDashboard = () => {
             <FaCalendarCheck />
             <span>예약</span>
           </NavIcon>
-          <NavIcon to="/profile">
+          <NavIcon to="/member/profile">
             <FaUser />
             <span>프로필</span>
           </NavIcon>

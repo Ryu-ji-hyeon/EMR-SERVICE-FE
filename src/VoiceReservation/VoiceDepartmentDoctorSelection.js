@@ -384,7 +384,7 @@ const DepartmentDoctorSelection = () => {
             <FaCalendarCheck />
             <span>예약</span>
           </NavIcon>
-          <NavIcon onClick={() => navigate('/profile')}>
+          <NavIcon onClick={() => navigate('/member/profile')}>
             <FaUser />
             <span>프로필</span>
           </NavIcon>
