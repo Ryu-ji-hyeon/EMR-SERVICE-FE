@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
 import { FaHome, FaCalendarCheck, FaUser, FaCog, FaArrowLeft } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Title = styled.h1`
   text-align: center;
@@ -79,13 +79,14 @@ const ActionItem = styled.li`
 const MainContent = styled.div`
   width: 100%;
   max-width: 980px;
-  min-height: 100vh;
+  min-height: calc(100vh - 70px); /* BottomNavBar의 높이만큼 뺀 값 */
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   background-color: #ffffff;
   padding: 2rem;
+  padding-bottom: 100px; /* BottomNavBar와 겹치지 않도록 */
   overflow: visible;
   position: relative;
 `;
@@ -146,12 +147,11 @@ const BottomNavBar = styled.div`
   z-index: 1000;
 `;
 
-const NavIcon = styled.div`
+const NavIcon = styled(Link)`
   font-size: 1.5rem;
   color: #007bff;
   text-decoration: none;
   text-align: center;
-  cursor: pointer;
 
   &:hover {
     color: #0056b3;

@@ -90,7 +90,7 @@ const DatePickerWrapper = styled.div`
 const MainContent = styled.div`
   width: 100%;
   max-width: 980px;
-  min-height: 100vh;
+  min-height: calc(100vh - 70px); /* BottomNavBar의 높이만큼 뺀 값 */
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -99,6 +99,7 @@ const MainContent = styled.div`
   border-radius: 16px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
   padding: 5rem 2rem;
+  padding-bottom: 100px; /* BottomNavBar와 겹치지 않도록 공간 확보 */
   overflow: visible;
   position: relative;
 `;
@@ -222,7 +223,7 @@ const DoctorReservations = () => {
         headers: { 'X-XSRF-TOKEN': csrfToken },
         withCredentials: true,
       });
-      
+
       const reservationsWithStatus = await Promise.all(
         response.data.map(async (reservation) => {
           const prescriptionStatus = await fetchPrescriptionStatus(reservation.reservationId);

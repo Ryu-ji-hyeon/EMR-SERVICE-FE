@@ -5,7 +5,6 @@ import ScreenContainer from '../components/ScreenContainer';
 import Content from '../components/Content';
 import { FaCalendarCheck, FaPrescriptionBottleAlt, FaCalendarPlus, FaHome, FaUser, FaCog } from 'react-icons/fa';
 
-
 const CardTitle = styled.h3`
   color: #333;
   font-size: 1.8rem;
@@ -21,8 +20,8 @@ const NavLink = styled(Link)`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4rem 5.5rem; /* 버튼 크기 조정: 세로 2rem, 가로 3rem */
-  font-size: 1.5rem; /* 폰트 크기를 1.5rem으로 조정 */
+  padding: 4rem 5.5rem;
+  font-size: 1.5rem;
   color: #fff;
   text-decoration: none;
   background-color: #007bff;
@@ -30,7 +29,7 @@ const NavLink = styled(Link)`
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
   transition: background-color 0.3s, transform 0.2s;
   width: 100%;
-  max-width: 350px; /* 버튼 최대 너비를 350px로 조정 */
+  max-width: 350px;
 
   &:hover {
     background-color: #0056b3;
@@ -38,57 +37,32 @@ const NavLink = styled(Link)`
   }
 
   svg {
-    margin-right: 12px; /* 아이콘과 텍스트 간의 간격 조정 */
-    font-size: 1.8rem; /* 아이콘 크기도 증가 */
+    margin-right: 12px;
+    font-size: 1.8rem;
   }
 
   @media (max-width: 480px) {
     font-size: 1.2rem;
-    padding: 1.5rem; /* 모바일 화면에서 크기 조정 */
+    padding: 1.5rem;
   }
 `;
 
 const MainContent = styled.div`
   width: 100%;
   max-width: 980px;
-  min-height: 100vh; /* 높이 설정을 화면 전체로 */
+  min-height: calc(100vh - 70px); /* BottomNavBar 높이를 뺀 값 */
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* 상단부터 배치 */
+  justify-content: flex-start;
   align-items: center;
   background-color: #ffffff;
   border-radius: 16px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
   padding: 20rem 2rem;
-  overflow: visible; /* 요소 잘리지 않도록 설정 */
+  overflow: visible;
   position: relative;
 `;
 
-// BackButton 스타일 정의
-const BackButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.75rem;
-  font-size: 1.5rem;
-  color: #007bff;
-  background-color: transparent;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
-
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  z-index: 100;
-
-  &:hover {
-    background-color: #e6e6e6;
-  }
-`;
-
-// BottomNavBar 스타일 정의
 const BottomNavBar = styled.div`
   width: 100%;
   max-width: 980px;
@@ -99,11 +73,11 @@ const BottomNavBar = styled.div`
   justify-content: space-around;
   align-items: center;
   box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
-  position: fixed; /* 화면 하단에 고정 */
+  position: fixed;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1000;
+  z-index: 1000; /* 다른 요소보다 앞에 위치 */
 `;
 
 const NavIcon = styled(Link)`
@@ -135,13 +109,13 @@ const DoctorDashboard = () => {
   return (
     <ScreenContainer>
       <MainContent>
-      <Content>
-        <CardTitle>의사 대시보드</CardTitle>
-        <NavLink to="/doctor/reservations">예약 확인</NavLink>
-        <NavLink to="/doctor/prescribe">처방전 입력</NavLink>
-      </Content>
+        <Content>
+          <CardTitle>의사 대시보드</CardTitle>
+          <NavLink to="/doctor/reservations">예약 확인</NavLink>
+          <NavLink to="/doctor/prescribe">처방전 입력</NavLink>
+        </Content>
 
-      <BottomNavBar>
+        <BottomNavBar>
           <NavIcon to="/doctor/dashboard">
             <FaHome />
             <span>홈</span>
@@ -159,7 +133,7 @@ const DoctorDashboard = () => {
             <span>로그아웃</span>
           </NavIcon>
         </BottomNavBar>
-        </MainContent>
+      </MainContent>
     </ScreenContainer>
   );
 };

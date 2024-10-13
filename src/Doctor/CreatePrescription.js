@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import styled from 'styled-components';
 import ScreenContainer from '../components/ScreenContainer';
 import Content from '../components/Content';
@@ -76,16 +76,17 @@ const Title = styled.h2`
 const MainContent = styled.div`
   width: 100%;
   max-width: 980px;
-  min-height: 100vh; /* 높이 설정을 화면 전체로 */
+  min-height: calc(100vh - 70px); /* BottomNavBar의 높이만큼 뺀 값 */
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* 상단부터 배치 */
+  justify-content: flex-start;
   align-items: center;
   background-color: #ffffff;
   border-radius: 16px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 20rem 2rem;
-  overflow: visible; /* 요소 잘리지 않도록 설정 */
+  padding: 5rem 2rem;
+  padding-bottom: 100px; /* BottomNavBar와 겹치지 않도록 */
+  overflow: visible;
   position: relative;
 `;
 
@@ -124,7 +125,7 @@ const BottomNavBar = styled.div`
   justify-content: space-around;
   align-items: center;
   box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
-  position: fixed; /* 화면 하단에 고정 */
+  position: fixed;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
@@ -132,12 +133,11 @@ const BottomNavBar = styled.div`
 `;
 
 // NavIcon 스타일 정의
-const NavIcon = styled.div`
+const NavIcon = styled(Link)`
   font-size: 1.5rem;
   color: #007bff;
   text-decoration: none;
   text-align: center;
-  cursor: pointer;
 
   &:hover {
     color: #0056b3;
@@ -302,7 +302,7 @@ const CreatePrescription = () => {
             <FaCalendarCheck />
             <span>예약 확인</span>
           </NavIcon>
-          <NavIcon to="/profile">
+          <NavIcon to="/doctor/profile">
             <FaUser />
             <span>프로필</span>
           </NavIcon>
