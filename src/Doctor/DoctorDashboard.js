@@ -150,7 +150,7 @@ const DoctorDashboard = () => {
             <FaCalendarCheck />
             <span>예약 확인</span>
           </NavIcon>
-          <NavIcon to="/profile">
+          <NavIcon to="/doctor/profile">
             <FaUser />
             <span>프로필</span>
           </NavIcon>

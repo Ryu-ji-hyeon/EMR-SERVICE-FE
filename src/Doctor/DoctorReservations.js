@@ -351,7 +351,7 @@ const DoctorReservations = () => {
             <FaCalendarCheck />
             <span>예약 확인</span>
           </NavIcon>
-          <NavIcon onClick={() => navigate('/profile')}>
+          <NavIcon onClick={() => navigate('/doctor/profile')}>
             <FaUser />
             <span>프로필</span>
           </NavIcon>
