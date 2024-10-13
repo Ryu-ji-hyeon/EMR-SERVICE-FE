@@ -27,6 +27,9 @@ import MemberProfile from './Member/MemberProfile';
 import MemberEdit from './Member/MemberEdit';
 import MemberUpdatePassword from './Member/MemberUpdatePassword';
 import MemberDelete from './Member/MemberDelete';
+import DoctorProfile from './Doctor/DoctorProfile';
+import DoctorUpdatePassword from './Doctor/DoctorUpdatePassword';
+import DoctorDelete from './Doctor/DoctorDelete';
 
 
 
@@ -80,6 +83,21 @@ function App() {
            <Route path="/member/delete" element={
             <PrivateRoute>
               <MemberDelete />
+            </PrivateRoute>
+          } />
+            <Route path="/doctor/profile" element={
+              <PrivateRoute>
+                <DoctorProfile />
+              </PrivateRoute>
+            } />
+            <Route path="/doctor/doctorupdatepassword" element={
+            <PrivateRoute>
+              <DoctorUpdatePassword />
+            </PrivateRoute>
+          } />
+          <Route path="/doctor/delete" element={
+            <PrivateRoute>
+              <DoctorDelete />
             </PrivateRoute>
           } />
             <Route path="/doctor/dashboard" element={
