@@ -131,7 +131,7 @@ const NavIcon = styled.div`
   }
 `;
 
-const ReservationDetails = () => {
+const DoctorReservationDetails = () => {
     const [prescriptions, setPrescriptions] = useState([]);
     const [csrfToken, setCsrfToken] = useState('');
     const location = useLocation();
@@ -194,10 +194,9 @@ const ReservationDetails = () => {
     return (
         <ScreenContainer>
             <MainContent>
-        {/* 뒤로 가기 버튼 추가 */}
-        {/* <BackButton onClick={handleGoBack}>
+        { <BackButton onClick={handleGoBack}>
           <FaArrowLeft />
-        </BackButton> */}
+        </BackButton> }
             <Content>
                 <Title>처방전 목록</Title>
                 {prescriptions.length > 0 ? (
@@ -217,19 +216,19 @@ const ReservationDetails = () => {
             </Content>
 
             <BottomNavBar>
-          <NavIcon to="/doctor/dashboard">
+          <NavIcon onClick={() => navigate('/doctor/dashboard')}>
             <FaHome />
             <span>홈</span>
           </NavIcon>
-          <NavIcon to="/doctor/reservations">
+          <NavIcon onClick={() => navigate('/doctor/reservations')}>
             <FaCalendarCheck />
             <span>예약 확인</span>
           </NavIcon>
-          <NavIcon to="/profile">
+          <NavIcon onClick={() => navigate('/doctor/profile')}>
             <FaUser />
             <span>프로필</span>
           </NavIcon>
-          <NavIcon to="/">
+          <NavIcon onClick={() => navigate('/')}>
             <FaCog />
             <span>로그아웃</span>
           </NavIcon>
@@ -239,4 +238,4 @@ const ReservationDetails = () => {
     );
 };
 
-export default ReservationDetails;
+export default DoctorReservationDetails;

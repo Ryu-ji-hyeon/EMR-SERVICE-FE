@@ -20,13 +20,14 @@ import VoiceGuide from './VoiceReservation/VoiceGuide';
 import CreatePrescription from './Doctor/CreatePrescription';
 import ViewPrescriptions from './Member/ViewPrescriptions';
 import DoctorReservations from './Doctor/DoctorReservations';
-import ReservationDetails from './VoiceReservation/ReservationDetails';
+import DoctorReservationDetails from './Doctor/DoctorReservationDetails';
 import StandardDepartmentDoctorSelector from './Department/StandardDepartmentDoctorSelector';
 import EditPrescription from './Doctor/EditPrescription';
 import MemberProfile from './Member/MemberProfile';
 import MemberEdit from './Member/MemberEdit';
 import MemberUpdatePassword from './Member/MemberUpdatePassword';
 import MemberDelete from './Member/MemberDelete';
+import MemberReservationDetails from './Member/MemberReservationDetails';
 import DoctorProfile from './Doctor/DoctorProfile';
 import DoctorUpdatePassword from './Doctor/DoctorUpdatePassword';
 import DoctorDelete from './Doctor/DoctorDelete';
@@ -55,9 +56,14 @@ function App() {
             </PrivateRoute>
           } />
             // 예약 자세히 보기
-           <Route path="/reservation/details" element={
+           <Route path="/doctor/reservation/details" element={
             <PrivateRoute>
-              <ReservationDetails />
+              <DoctorReservationDetails />
+            </PrivateRoute>
+          } />
+          <Route path="/member/reservation/details" element={
+            <PrivateRoute>
+              <MemberReservationDetails />
             </PrivateRoute>
           } />
           <Route path="/member/prescriptions" element={

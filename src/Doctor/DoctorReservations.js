@@ -261,7 +261,7 @@ const DoctorReservations = () => {
     if (!isPrescribed) {
       navigate('/doctor/prescribe', { state: { reservationId } });
     } else {
-      navigate('/reservation/details', { state: { reservationId } });
+      navigate('/doctor/reservation/details', { state: { reservationId } });
     }
 
     // 처방 상태 업데이트

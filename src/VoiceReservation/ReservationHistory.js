@@ -207,7 +207,7 @@ const ReservationHistory = () => {
   }, [patientId, csrfToken]);
 
   const handleViewDetails = (reservationId) => {
-    navigate('/reservation/details', { state: { reservationId } });
+    navigate('/member/reservation/details', { state: { reservationId } });
   };
 
   return (
