@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Route, Routes, BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './PrivateRoute';
-import Home from './Main/Home';
 import LoginForm from './Main/LoginForm';
 import SignupForm from './Main/SignupForm';
 import DoctorSignup from './Doctor/DoctorSignup';
@@ -78,7 +77,6 @@ function App() {
           <Route path="/Standard/ReservationScreen" element={<PrivateRoute><StandardReservation /></PrivateRoute>} />
           <Route path="/standard-reservation" element={<PrivateRoute><StandardDepartmentDoctorSelector /></PrivateRoute>} />
           <Route path="/Voice/VoiceGuide" element={<PrivateRoute><VoiceGuide /></PrivateRoute>} />
-          <Route path="/logout" element={<PrivateRoute><Home /></PrivateRoute>} />
         </Routes>
       </div>
     </AuthProvider>

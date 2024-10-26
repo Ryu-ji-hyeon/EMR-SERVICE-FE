@@ -2,10 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styled from 'styled-components';
-import ScreenContainer from '../components/ScreenContainer';
-import Content from '../components/Content';
-import { FaHome, FaCalendarCheck, FaUser, FaCog, FaArrowLeft } from 'react-icons/fa';
-
+import { FaArrowLeft } from 'react-icons/fa';
 
 const FormGroup = styled.div`
   margin-bottom: 1rem;
@@ -32,10 +29,6 @@ const Input = styled.input`
     outline: none;
     border-color: #2260ff;
   }
-
-  @media (max-width: 480px) {
-    font-size: 0.875rem;
-  }
 `;
 
 const Select = styled.select`
@@ -51,11 +44,8 @@ const Select = styled.select`
     outline: none;
     border-color: #2260ff;
   }
-
-  @media (max-width: 480px) {
-    font-size: 0.875rem;
-  }
 `;
+
 const BackButton = styled.button`
   display: flex;
   align-items: center;
@@ -77,6 +67,7 @@ const BackButton = styled.button`
     background-color: #e6e6e6;
   }
 `;
+
 const Button = styled.button`
   width: 100%;
   padding: 1.2rem;
@@ -92,34 +83,45 @@ const Button = styled.button`
   &:hover {
     background-color: #1c3faa;
   }
-
-  @media (max-width: 480px) {
-    font-size: 0.875rem;
-    padding: 0.75rem;
-  }
 `;
 
-const MainContent = styled.div`
-  width: 100%;
-  max-width: 980px;
-  min-height: 100vh;
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: #ffffff;
+  z-index: 1000;
+`;
+
+const ModalContainer = styled.div`
+  width: 400px;
   padding: 2rem;
-  overflow: visible;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
   position: relative;
 `;
 
-const LoginFormWrapper = styled.div`
-  width: 100%;
-  max-width: 600px;
-  padding: 2rem;
-  background-color: #fff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 1px;
+const ModalButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  background-color: #2260ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 1rem;
+
+  &:hover {
+    background-color: #1c3faa;
+  }
 `;
 
 const DoctorSignup = () => {
@@ -131,15 +133,15 @@ const DoctorSignup = () => {
   });
   const [depts, setDepts] = useState([]);
   const [csrfToken, setCsrfToken] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // 부서 목록을 서버에서 가져옵니다.
     axios.get(`${process.env.REACT_APP_API_SERVER}/api/doctor/departments`, { withCredentials: true })
       .then(response => setDepts(response.data))
       .catch(error => console.error('Error fetching departments:', error));
 
-    // CSRF 토큰을 서버에서 가져옵니다.
     axios.get(`${process.env.REACT_APP_API_SERVER}/api/csrf-token`, { withCredentials: true })
       .then(response => setCsrfToken(response.data.token))
       .catch(error => console.error('Error fetching CSRF token:', error));
@@ -163,25 +165,56 @@ const DoctorSignup = () => {
     })
       .then(response => {
         console.log('Signup successful:', response.data);
-        alert('회원가입이 성공적으로 완료되었습니다.');
-        navigate('/home/loginForm');
+        setShowSuccessModal(true); // 성공 모달 표시
       })
       .catch(error => {
         console.error('Error during signup:', error);
-        alert('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
+        setShowErrorModal(true); // 실패 모달 표시
       });
   };
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    navigate('/home/loginForm'); // 회원가입 성공 시 로그인 페이지로 이동
+  };
+
+  const handleCloseErrorModal = () => {
+    setShowErrorModal(false);
+  };
+
   const handleGoBack = () => {
     navigate('/home/choiceMember');
   };
 
   return (
-    <ScreenContainer>
-      <MainContent>
-      <BackButton onClick={handleGoBack}>
+    <ModalOverlay>
+      <ModalContainer>
+        <BackButton onClick={handleGoBack}>
           <FaArrowLeft />
         </BackButton>
-      <LoginFormWrapper>
+
+        {/* 회원가입 성공 모달 */}
+        {showSuccessModal && (
+          <ModalOverlay>
+            <ModalContainer>
+              <h3>회원가입 성공</h3>
+              <p>회원가입이 성공적으로 완료되었습니다.</p>
+              <ModalButton onClick={handleCloseSuccessModal}>확인</ModalButton>
+            </ModalContainer>
+          </ModalOverlay>
+        )}
+
+        {/* 회원가입 실패 모달 */}
+        {showErrorModal && (
+          <ModalOverlay>
+            <ModalContainer>
+              <h3>회원가입 실패</h3>
+              <p>회원가입 중 오류가 발생했습니다. 다시 시도해주세요.</p>
+              <ModalButton onClick={handleCloseErrorModal}>확인</ModalButton>
+            </ModalContainer>
+          </ModalOverlay>
+        )}
+
         <h3>의사 회원가입</h3>
         <form onSubmit={handleSubmit}>
           <FormGroup>
@@ -239,9 +272,8 @@ const DoctorSignup = () => {
           </FormGroup>
           <Button type="submit">회원가입</Button>
         </form>
-        </LoginFormWrapper>
-      </MainContent>
-    </ScreenContainer>
+      </ModalContainer>
+    </ModalOverlay>
   );
 };
 

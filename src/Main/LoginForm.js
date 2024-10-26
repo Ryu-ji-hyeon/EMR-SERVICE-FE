@@ -23,7 +23,7 @@ const Select = styled.select`
   border-radius: 4px;
   border: 1px solid #ddd;
   background-color: #f9f9f9;
-  font-size: 1.1rem; /* 입력 크기 약간 증가 */
+  font-size: 1.1rem;
   color: #333;
 
   &:focus {
@@ -38,7 +38,7 @@ const Input = styled.input`
   border-radius: 4px;
   border: 1px solid #ddd;
   background-color: #f9f9f9;
-  font-size: 1.1rem; /* 입력 크기 약간 증가 */
+  font-size: 1.1rem;
   color: #333;
 
   &:focus {
@@ -67,16 +67,6 @@ const Button = styled.button`
 
   &:hover {
     background-color: #1c3faa;
-  }
-`;
-
-const StyledLink = styled(Link)`
-  color: #2260ff;
-  text-decoration: none;
-  font-weight: bold;
-
-  &:hover {
-    text-decoration: underline;
   }
 `;
 
@@ -126,6 +116,15 @@ const CardFooter = styled.div`
     }
   }
 `;
+const StyledLink = styled(Link)`
+  color: #2260ff;
+  text-decoration: none;
+  font-weight: bold;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -133,7 +132,7 @@ const ModalOverlay = styled.div`
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.5); /* 어두운 배경 */
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -165,45 +164,12 @@ const ModalButton = styled.button`
   }
 `;
 
-const ScreenWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f1f4f8;
-  padding: 0 2rem;
-`;
-
-const MainContent = styled.div`
-  width: 100%;
-  max-width: 980px;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: #ffffff;
-  padding: 2rem;
-  overflow: visible;
-  position: relative;
-`;
-
-const LoginFormWrapper = styled.div`
-  width: 100%;
-  max-width: 600px;
-  padding: 2rem;
-  background-color: #fff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 1px;
-`;
-
 const LoginForm = () => {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [loginType, setLoginType] = useState('member');
   const [errorMessage, setErrorMessage] = useState('');
   const [csrfToken, setCsrfToken] = useState('');
-  const [showModal, setShowModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const navigate = useNavigate();
   const { handleLogin } = useAuth();
 
@@ -229,9 +195,8 @@ const LoginForm = () => {
 
     try {
       const response = await handleLogin(credentials.username, credentials.password, loginType, csrfToken);
-
       console.log('로그인 성공:', response);
-      setShowModal(true); 
+      setShowSuccessModal(true); // 로그인 성공 시 성공 모달 열기
     } catch (error) {
       console.error('로그인 실패:', error);
       setErrorMessage('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
@@ -239,7 +204,7 @@ const LoginForm = () => {
   };
 
   const handleModalClose = () => {
-    setShowModal(false);
+    setShowSuccessModal(false);
 
     if (loginType === 'member') {
       navigate(`/member/dashboard`);
@@ -249,62 +214,61 @@ const LoginForm = () => {
   };
 
   return (
-    <ScreenWrapper>
-      <MainContent>
-        <LoginFormWrapper>
-          <h3>로그인</h3>
-          <form onSubmit={handleSubmit}>
-            <FormGroup>
-              <Label htmlFor="loginType">로그인 유형</Label>
-              <Select id="loginType" value={loginType} onChange={handleLoginTypeChange}>
-                <option value="member">회원 로그인</option>
-                <option value="doctor">의사 로그인</option>
-              </Select>
-            </FormGroup>
-            <FormGroup>
-              <Label htmlFor="username">아이디</Label>
-              <Input
-                type="text"
-                id="username"
-                name="username"
-                placeholder="아이디"
-                value={credentials.username}
-                onChange={handleChange}
-                required
-              />
-            </FormGroup>
-            <FormGroup>
-              <Label htmlFor="password">비밀번호</Label>
-              <Input
-                type="password"
-                id="password"
-                name="password"
-                placeholder="비밀번호"
-                value={credentials.password}
-                onChange={handleChange}
-                required
-              />
-            </FormGroup>
-            {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
-            <Button type="submit">로그인</Button>
-          </form>
-          <CardFooter>
-            아직 회원이 아니신가요? <StyledLink to="/home/choiceMember">회원가입</StyledLink>
-            <SocialLoginContainer>
-              <a href="http://localhost:8080/oauth2/callback/google">
-                <FaGoogle /> Google
-              </a>
-              <a href="http://localhost:8080/oauth2/callback/naver">
-                <FaLeaf /> Naver
-              </a>
-              <a href="http://localhost:8080/oauth2/callback/kakao">
-                <FaComment /> Kakao
-              </a>
-            </SocialLoginContainer>
-          </CardFooter>
-        </LoginFormWrapper>
+    <ModalOverlay>
+      <ModalContainer>
+        <h3>로그인</h3>
+        <form onSubmit={handleSubmit}>
+          <FormGroup>
+            <Label htmlFor="loginType">로그인 유형</Label>
+            <Select id="loginType" value={loginType} onChange={handleLoginTypeChange}>
+              <option value="member">회원 로그인</option>
+              <option value="doctor">의사 로그인</option>
+            </Select>
+          </FormGroup>
+          <FormGroup>
+            <Label htmlFor="username">아이디</Label>
+            <Input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="아이디"
+              value={credentials.username}
+              onChange={handleChange}
+              required
+            />
+          </FormGroup>
+          <FormGroup>
+            <Label htmlFor="password">비밀번호</Label>
+            <Input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="비밀번호"
+              value={credentials.password}
+              onChange={handleChange}
+              required
+            />
+          </FormGroup>
+          {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
+          <Button type="submit">로그인</Button>
+        </form>
+        <CardFooter>
+          아직 회원이 아니신가요? <StyledLink to="/home/choiceMember">회원가입</StyledLink>
+          <SocialLoginContainer>
+            <a href="http://localhost:8080/oauth2/callback/google">
+              <FaGoogle /> Google
+            </a>
+            <a href="http://localhost:8080/oauth2/callback/naver">
+              <FaLeaf /> Naver
+            </a>
+            <a href="http://localhost:8080/oauth2/callback/kakao">
+              <FaComment /> Kakao
+            </a>
+          </SocialLoginContainer>
+        </CardFooter>
 
-        {showModal && (
+        {/* 로그인 성공 모달 */}
+        {showSuccessModal && (
           <ModalOverlay>
             <ModalContainer>
               <h3>로그인 성공!</h3>
@@ -313,8 +277,8 @@ const LoginForm = () => {
             </ModalContainer>
           </ModalOverlay>
         )}
-      </MainContent>
-    </ScreenWrapper>
+      </ModalContainer>
+    </ModalOverlay>
   );
 };
 

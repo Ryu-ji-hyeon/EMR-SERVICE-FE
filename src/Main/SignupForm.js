@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';  
 import styled from 'styled-components';
-import { FaGoogle, FaLeaf, FaComment } from 'react-icons/fa';
-import ScreenContainer from '../components/ScreenContainer';
-import Content from '../components/Content';
-import { FaHome, FaCalendarCheck, FaUser, FaCog, FaArrowLeft } from 'react-icons/fa';
-// 스타일 컴포넌트 정의
+import { FaGoogle, FaLeaf, FaComment, FaArrowLeft } from 'react-icons/fa';
+
 const FormGroup = styled.div`
   margin-bottom: 1.5rem;
   width: 100%;
@@ -135,40 +132,33 @@ const CardFooter = styled.div`
   }
 `;
 
-const ScreenWrapper = styled.div`
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-color: #f1f4f8;
-  padding: 0 2rem;
+  z-index: 1000;
 `;
 
-const MainContent = styled.div`
-  width: 100%;
-  max-width: 980px;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: #ffffff;
+const ModalContainer = styled.div`
+  width: 400px;
   padding: 2rem;
-  overflow: visible;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
   position: relative;
 `;
 
-const LoginFormWrapper = styled.div`
-  width: 100%;
-  max-width: 600px;
-  padding: 2rem;
-  background-color: #fff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 1px;
-`;
-
 const BackButton = styled.button`
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -180,10 +170,6 @@ const BackButton = styled.button`
   border-radius: 50%;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  z-index: 100;
 
   &:hover {
     background-color: #e6e6e6;
@@ -197,7 +183,7 @@ const SignupForm = () => {
 
   const handleUserTypeChange = (event) => {
     setUserType(event.target.value);
-    setError('');  // 라디오 버튼 선택 시 에러 메시지 제거
+    setError('');
   };
 
   const handleSubmit = (event) => {
@@ -216,13 +202,13 @@ const SignupForm = () => {
   const handleGoBack = () => {
     navigate('/home/loginForm');
   };
+
   return (
-    <ScreenWrapper>
-      <MainContent>
-      <BackButton onClick={handleGoBack}>
+    <ModalOverlay>
+      <ModalContainer>
+        <BackButton onClick={handleGoBack}>
           <FaArrowLeft />
         </BackButton>
-      <LoginFormWrapper>
         <h3>회원가입</h3>
         <form onSubmit={handleSubmit}>
           <FormGroup>
@@ -266,9 +252,8 @@ const SignupForm = () => {
             </a>
           </SocialLoginContainer>
         </CardFooter>
-        </LoginFormWrapper>
-      </MainContent>
-    </ScreenWrapper>
+      </ModalContainer>
+    </ModalOverlay>
   );
 };
 
