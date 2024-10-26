@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Route, Routes, BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './PrivateRoute';
@@ -31,138 +31,56 @@ import MemberReservationDetails from './Member/MemberReservationDetails';
 import DoctorProfile from './Doctor/DoctorProfile';
 import DoctorUpdatePassword from './Doctor/DoctorUpdatePassword';
 import DoctorDelete from './Doctor/DoctorDelete';
-
-
+import SplashScreen from './components/SplashScreen'; // 스플래시 스크린 추가
 
 function App() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // 2초 후 로딩 종료
+    const timer = setTimeout(() => setLoading(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // 로딩 중에는 스플래시 스크린 표시
+  if (loading) {
+    return <SplashScreen />;
+  }
+
   return (
     <AuthProvider>
-        <div className="main-content">
-          <Routes>
-            <Route path="/" element={<LoginForm />} />
-            <Route path="/home/loginForm" element={<LoginForm />} />
-            <Route path="/home/choiceMember" element={<SignupForm />} />
-            <Route path="/doctor/signup" element={<DoctorSignup />} />
-            <Route path="/member/signup" element={<MemberSignup />} />
-            <Route path="/member/dashboard" element={
-              <PrivateRoute>
-                <MemberDashboard />
-              </PrivateRoute>
-            } />
-            // 예약 확인
-            <Route path="/member/reservations" element={
-            <PrivateRoute>
-              <ReservationHistory />
-            </PrivateRoute>
-          } />
-            // 예약 자세히 보기
-           <Route path="/doctor/reservation/details" element={
-            <PrivateRoute>
-              <DoctorReservationDetails />
-            </PrivateRoute>
-          } />
-          <Route path="/member/reservation/details" element={
-            <PrivateRoute>
-              <MemberReservationDetails />
-            </PrivateRoute>
-          } />
-          <Route path="/member/prescriptions" element={
-            <PrivateRoute>
-              <ViewPrescriptions />
-            </PrivateRoute>
-          } />
-           <Route path="/member/profile" element={
-            <PrivateRoute>
-              <MemberProfile />
-            </PrivateRoute>
-          } />
-           <Route path="/member/edit" element={
-            <PrivateRoute>
-              <MemberEdit />
-            </PrivateRoute>
-          } />
-          <Route path="/member/memberupdatepassword" element={
-            <PrivateRoute>
-              <MemberUpdatePassword />
-            </PrivateRoute>
-          } />
-           <Route path="/member/delete" element={
-            <PrivateRoute>
-              <MemberDelete />
-            </PrivateRoute>
-          } />
-            <Route path="/doctor/profile" element={
-              <PrivateRoute>
-                <DoctorProfile />
-              </PrivateRoute>
-            } />
-            <Route path="/doctor/doctorupdatepassword" element={
-            <PrivateRoute>
-              <DoctorUpdatePassword />
-            </PrivateRoute>
-          } />
-          <Route path="/doctor/delete" element={
-            <PrivateRoute>
-              <DoctorDelete />
-            </PrivateRoute>
-          } />
-            <Route path="/doctor/dashboard" element={
-              <PrivateRoute>
-                <DoctorDashboard />
-              </PrivateRoute>
-            } />
-             <Route path="/doctor/prescribe" element={
-              <PrivateRoute>
-                <CreatePrescription />
-              </PrivateRoute>
-            } />
-            <Route path="/doctor/edit-prescription" element={
-              <PrivateRoute>
-                <EditPrescription />
-              </PrivateRoute>
-            } />
-            <Route path="/doctor/reservations" element={
-              <PrivateRoute>
-                <DoctorReservations />
-              </PrivateRoute>
-            } />
-            <Route path="/reservation-choice" element={
-              <PrivateRoute>
-                <ReservationChoice />
-              </PrivateRoute>
-            } />
-            <Route path="/Voice/DepartmentDoctorSelection" element={
-              <PrivateRoute>
-                <DepartmentDoctorSelection />
-              </PrivateRoute>
-            } />
-            <Route path="/Voice/ReservationScreen" element={
-              <PrivateRoute>
-                <VoiceReservationSystem />
-              </PrivateRoute>
-            } />
-            <Route path="/Standard/ReservationScreen" element={
-              <PrivateRoute>
-                <StandardReservation />
-              </PrivateRoute>
-            } />
-            <Route path="/standard-reservation" element={
-              <PrivateRoute>
-                <StandardDepartmentDoctorSelector />
-              </PrivateRoute>
-            } />
-            <Route path="/Voice/VoiceGuide" element={
-              <PrivateRoute>
-                <VoiceGuide />
-              </PrivateRoute>
-            } />
-            <Route path="/logout" element={
-              <PrivateRoute>
-                <Home />
-              </PrivateRoute>
-            } />
-          </Routes>
-        </div>
+      <div className="main-content">
+        <Routes>
+          <Route path="/" element={<LoginForm />} />
+          <Route path="/home/loginForm" element={<LoginForm />} />
+          <Route path="/home/choiceMember" element={<SignupForm />} />
+          <Route path="/doctor/signup" element={<DoctorSignup />} />
+          <Route path="/member/signup" element={<MemberSignup />} />
+          <Route path="/member/dashboard" element={<PrivateRoute><MemberDashboard /></PrivateRoute>} />
+          <Route path="/member/reservations" element={<PrivateRoute><ReservationHistory /></PrivateRoute>} />
+          <Route path="/doctor/reservation/details" element={<PrivateRoute><DoctorReservationDetails /></PrivateRoute>} />
+          <Route path="/member/reservation/details" element={<PrivateRoute><MemberReservationDetails /></PrivateRoute>} />
+          <Route path="/member/prescriptions" element={<PrivateRoute><ViewPrescriptions /></PrivateRoute>} />
+          <Route path="/member/profile" element={<PrivateRoute><MemberProfile /></PrivateRoute>} />
+          <Route path="/member/edit" element={<PrivateRoute><MemberEdit /></PrivateRoute>} />
+          <Route path="/member/memberupdatepassword" element={<PrivateRoute><MemberUpdatePassword /></PrivateRoute>} />
+          <Route path="/member/delete" element={<PrivateRoute><MemberDelete /></PrivateRoute>} />
+          <Route path="/doctor/profile" element={<PrivateRoute><DoctorProfile /></PrivateRoute>} />
+          <Route path="/doctor/doctorupdatepassword" element={<PrivateRoute><DoctorUpdatePassword /></PrivateRoute>} />
+          <Route path="/doctor/delete" element={<PrivateRoute><DoctorDelete /></PrivateRoute>} />
+          <Route path="/doctor/dashboard" element={<PrivateRoute><DoctorDashboard /></PrivateRoute>} />
+          <Route path="/doctor/prescribe" element={<PrivateRoute><CreatePrescription /></PrivateRoute>} />
+          <Route path="/doctor/edit-prescription" element={<PrivateRoute><EditPrescription /></PrivateRoute>} />
+          <Route path="/doctor/reservations" element={<PrivateRoute><DoctorReservations /></PrivateRoute>} />
+          <Route path="/reservation-choice" element={<PrivateRoute><ReservationChoice /></PrivateRoute>} />
+          <Route path="/Voice/DepartmentDoctorSelection" element={<PrivateRoute><DepartmentDoctorSelection /></PrivateRoute>} />
+          <Route path="/Voice/ReservationScreen" element={<PrivateRoute><VoiceReservationSystem /></PrivateRoute>} />
+          <Route path="/Standard/ReservationScreen" element={<PrivateRoute><StandardReservation /></PrivateRoute>} />
+          <Route path="/standard-reservation" element={<PrivateRoute><StandardDepartmentDoctorSelector /></PrivateRoute>} />
+          <Route path="/Voice/VoiceGuide" element={<PrivateRoute><VoiceGuide /></PrivateRoute>} />
+          <Route path="/logout" element={<PrivateRoute><Home /></PrivateRoute>} />
+        </Routes>
+      </div>
     </AuthProvider>
   );
 }
