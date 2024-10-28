@@ -6,6 +6,8 @@ import styled from 'styled-components';
 import ScreenContainer from '../components/ScreenContainer';
 import Content from '../components/Content';
 import { FaHome, FaCalendarCheck, FaUser, FaCog, FaArrowLeft } from 'react-icons/fa';
+import Modal from 'react-modal';
+Modal.setAppElement('#root');
 
 
 const ReservationList = styled.ul`
@@ -142,10 +144,44 @@ const NavIcon = styled.div`
   }
 `;
 
+const EditButton = styled.button`
+  padding: 0.5rem;
+  background-color: #ffc107;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-right: 0.5rem;
+
+  &:hover {
+    background-color: #e0a800;
+  }
+`;
+
+const DeleteButton = styled.button`
+  padding: 0.5rem;
+  background-color: #dc3545;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #c82333;
+  }
+`;
+
+
 const ReservationHistory = () => {
   const [reservations, setReservations] = useState([]);
   const [patientId, setPatientId] = useState(null);
   const [csrfToken, setCsrfToken] = useState('');
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // 모달 상태
+  const [selectedReservationId, setSelectedReservationId] = useState(null);
   const navigate = useNavigate(); // 페이지 이동을 위한 navigate 훅
 
   const handleGoBack = () => {
@@ -167,15 +203,14 @@ const ReservationHistory = () => {
     const token = localStorage.getItem('accessToken');
     if (token) {
       const decodedToken = jwtDecode(token);
-      const patientLoginId = decodedToken?.sub; // JWT에서 patientLoginId 추출
+      const patientLoginId = decodedToken?.sub;
 
-      // patientLoginId를 사용하여 patientId를 가져오는 API 호출
       axios.get(`${process.env.REACT_APP_API_SERVER}/api/member/patient-id`, {
         params: { loginId: patientLoginId },
         withCredentials: true
       })
       .then(response => {
-        setPatientId(response.data); // patientId 설정
+        setPatientId(response.data);
       })
       .catch(error => {
         console.error('Error fetching patient ID:', error);
@@ -210,36 +245,75 @@ const ReservationHistory = () => {
     navigate('/member/reservation/details', { state: { reservationId } });
   };
 
+  const openDeleteModal = (reservationId) => {
+    setSelectedReservationId(reservationId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setSelectedReservationId(null);
+  };
+
+  const handleDeleteReservation = async () => {
+    try {
+      await axios.delete(`${process.env.REACT_APP_API_SERVER}/api/reservations/${selectedReservationId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          'X-XSRF-TOKEN': csrfToken
+        },
+        withCredentials: true
+      });
+
+      setReservations((prevReservations) => prevReservations.filter(reservation => reservation.reservationId !== selectedReservationId));
+      closeDeleteModal();
+    } catch (error) {
+      console.error('Error deleting reservation:', error);
+    }
+  };
+
+
+  const isPastDate = (date) => {
+    const today = new Date();
+    const reservationDate = new Date(date);
+    return reservationDate < today;
+  };
+
   return (
     <ScreenContainer>
       <MainContent>
-        {/* 뒤로 가기 버튼 추가 */}
         <BackButton onClick={handleGoBack}>
           <FaArrowLeft />
         </BackButton>
-      <Content>
-        <h2 className="text-center mb-4">예약 내역</h2>
-        <ReservationList>
-          {reservations.length === 0 ? (
-            <NoReservationsMessage>예약 내역이 없습니다.</NoReservationsMessage>
-          ) : (
-            reservations.map((reservation) => (
-              <ReservationItem key={reservation.reservationId}>
-                <ReservationDetail><strong>의사:</strong> {reservation.doctorName}</ReservationDetail>
-                <ReservationDetail><strong>부서:</strong> {reservation.deptName}</ReservationDetail>
-                <ReservationDetail><strong>날짜:</strong> {reservation.date}</ReservationDetail>
-                <ReservationDetail><strong>시간:</strong> {reservation.time}</ReservationDetail>
-                <ViewButton onClick={() => handleViewDetails(reservation.reservationId)}>
-                  처방전 보기
-                </ViewButton>
-              </ReservationItem>
-            ))
-          )}
-        </ReservationList>
-      </Content>
+        <Content>
+          <h2 className="text-center mb-4">예약 내역</h2>
+          <ReservationList>
+            {reservations.length === 0 ? (
+              <NoReservationsMessage>예약 내역이 없습니다.</NoReservationsMessage>
+            ) : (
+              reservations.map((reservation) => (
+                <ReservationItem key={reservation.reservationId}>
+                  <ReservationDetail><strong>의사:</strong> {reservation.doctorName}</ReservationDetail>
+                  <ReservationDetail><strong>부서:</strong> {reservation.deptName}</ReservationDetail>
+                  <ReservationDetail><strong>날짜:</strong> {reservation.date}</ReservationDetail>
+                  <ReservationDetail><strong>시간:</strong> {reservation.time}</ReservationDetail>
+                  
+                  <ViewButton onClick={() => handleViewDetails(reservation.reservationId)}>
+                    처방전 보기
+                  </ViewButton>
+                  <DeleteButton
+                    onClick={() => openDeleteModal(reservation.reservationId)}
+                    disabled={isPastDate(reservation.date)} // 과거 날짜라면 비활성화
+                  >
+                    예약 취소
+                  </DeleteButton>
+                </ReservationItem>
+              ))
+            )}
+          </ReservationList>
+        </Content>
 
-      {/* 하단 네비게이션 바 추가 */}
-      <BottomNavBar>
+        <BottomNavBar>
           <NavIcon onClick={() => navigate('/member/dashboard')}>
             <FaHome />
             <span>홈</span>
@@ -258,6 +332,36 @@ const ReservationHistory = () => {
           </NavIcon>
         </BottomNavBar>
       </MainContent>
+
+      {/* 삭제 확인 모달 */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onRequestClose={closeDeleteModal}
+        style={{
+          content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+            padding: '2rem',
+            borderRadius: '8px',
+            textAlign: 'center'
+          }
+        }}
+      >
+        <h2>예약을 취소하시겠습니까?</h2>
+        <p>이 작업은 되돌릴 수 없습니다.</p>
+        <div style={{ marginTop: '1rem' }}>
+          <button onClick={handleDeleteReservation} style={{ padding: '0.5rem 1rem', marginRight: '1rem', backgroundColor: '#dc3545', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+            삭제
+          </button>
+          <button onClick={closeDeleteModal} style={{ padding: '0.5rem 1rem', backgroundColor: '#6c757d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+            취소
+          </button>
+        </div>
+      </Modal>
     </ScreenContainer>
   );
 };
