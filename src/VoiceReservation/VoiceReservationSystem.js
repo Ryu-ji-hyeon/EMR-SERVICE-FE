@@ -7,7 +7,7 @@ import AvailableTimes from '../StandardReservation/AvailableTimes';
 import { jwtDecode } from 'jwt-decode';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { FaHome, FaCalendarCheck, FaUser, FaCog, FaArrowLeft } from 'react-icons/fa';
+import { FaHome, FaCalendarCheck, FaUser, FaCog, FaArrowLeft, FaMicrophone } from 'react-icons/fa';
 
 const Title = styled.h1`
   text-align: center;
@@ -64,16 +64,32 @@ const Button = styled.button`
 
 const ControlPanelContainer = styled.div`
   display: flex;
-  justify-content: center;
-  gap: 10px;
+  gap: 1rem;
+  width: 100%;
+  max-width: 500px;
+  flex-direction: column;
   margin-top: 20px;
 `;
 
-const Transcript = styled.p`
+const TranscriptContainer = styled.div`
+  background-color: #f5f5f5;
+  padding: 1rem;
+  border-radius: 8px;
   margin-top: 20px;
-  font-size: 16px;
-  color: #333;
-  word-break: break-word;
+  width: 100%;
+  max-width: 500px;
+`;
+
+const CurrentTranscript = styled.div`
+  background-color: #e3f2fd;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  color: #1976d2;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 10px;
 `;
 
 const MainContent = styled.div`
@@ -160,6 +176,25 @@ const BackButton = styled.button`
     background-color: #e6e6e6;
   }
 `;
+const ResponseList = styled.ul`
+  list-style-type: none;
+  padding: 0;
+  margin-top: 1rem;
+
+  li {
+    background-color: #f9f9f9;
+    margin-bottom: 0.5rem;
+    padding: 0.75rem;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+  }
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+`;
 
 const VoiceReservationSystem = () => {
   const { speak, cancel } = useSpeechSynthesis();
@@ -174,6 +209,10 @@ const VoiceReservationSystem = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [recognizedText, setRecognizedText] = useState(''); // 인식된 텍스트
+  const [isConfirmingReservation, setIsConfirmingReservation] = useState(false);
+  const [pendingReservation, setPendingReservation] = useState(null);
+  const [isListening, setIsListening] = useState(false);
+  const [userCommands, setUserCommands] = useState([]);
 
   const handleGoBack = () => {
     navigate('/Voice/DepartmentDoctorSelection'); // ReservationChoice로 이동
@@ -215,100 +254,89 @@ const VoiceReservationSystem = () => {
 
   useEffect(() => {
     if (!listening && transcript) {
-      setRecognizedText(transcript); // 실시간으로 인식된 텍스트 저장
-      handleVoiceCommand(transcript);
+      // Handle the command if transcript is available
+      handleVoiceCommand(transcript.trim());
+      setRecognizedText(transcript);
+      setUserCommands(prevCommands => [...prevCommands, transcript]);
       resetTranscript();
     }
   }, [listening, transcript, resetTranscript]);
 
   const startListening = () => SpeechRecognition.startListening({ continuous: true, language: 'ko-KR' });
 
-  const handleStopListening = () => {
-    SpeechRecognition.stopListening(); 
-    if (currentStep === 2) {
-      handleDateSelection(recognizedText); // 날짜 선택
-    } else if (currentStep === 3) {
-      handleTimeSelection(recognizedText); // 시간 선택
+  const toggleListening = () => {
+    if (isListening) {
+      SpeechRecognition.stopListening();
+    } else {
+      SpeechRecognition.startListening({ continuous: true, language: 'ko-KR' });
     }
-    setRecognizedText('');
+    setIsListening(!isListening);
   };
 
-  // 음성 명령에 따른 처리
+  const handleReset = () => {
+    resetTranscript();
+    setRecognizedText('');
+    setUserCommands([]);
+    setCurrentStep(0); // Reset to the first step
+  };
+
+  const startVoiceReservation = () => {
+    speak({ text: '예약 날짜와 시간 선택하는 화면입니다. 예약할 날짜를 말씀해주세요.' });
+    setCurrentStep(2); // Move to the date selection step
+    startListening();
+  };
+
   const handleVoiceCommand = (command) => {
+    console.log("Current Step:", currentStep, "Recognized Command:", command);
+
+    if (isConfirmingReservation) {
+      // Handle reservation confirmation step
+      if (command.includes('네') || command.includes('예') || command.includes('좋습니다')) {
+        setIsConfirmingReservation(false);
+        if (pendingReservation) {
+          makeReservation(pendingReservation.date, pendingReservation.time);
+        }
+      } else if (command.includes('아니오') || command.includes('아니요') || command.includes('취소')) {
+        speak({ text: '예약이 취소되었습니다. 다른 시간을 선택해주세요.' });
+        setIsConfirmingReservation(false);
+        setPendingReservation(null);
+        setCurrentStep(3); // Return to the time selection step
+      } else {
+        speak({ text: '네 또는 아니오로 답변해 주세요.' });
+        startListening();
+      }
+    } else {
+      // Process steps for date and time selection
       if (currentStep === 2) {
         handleDateSelection(command);
       } else if (currentStep === 3) {
         handleTimeSelection(command);
       }
+    }
   };
 
-  const startVoiceReservation = () => {
-    speak({ text: '예약 날짜와 시간 선택하는 화면입니다. 예약할 날짜를 말씀해주세요.' });
-    setCurrentStep(2); // 날짜 선택 단계로 이동
-    startListening();
-  };
-
-  const handleDateClick = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const formattedDate = `${year}-${month}-${day}`;
-
-    setSelectedDate(formattedDate);
-    fetchAvailableTimes(selectedDoctor?.doctorId, formattedDate);
-  };
-  // 날짜 선택
   const handleDateSelection = (command) => {
     const parsedDate = parseDate(command);
     if (parsedDate) {
       setSelectedDate(parsedDate);
+      setCurrentStep(3); // Move to the time selection step
       speak({ text: `${parsedDate} 날짜를 선택하셨습니다. 예약할 시간을 말해주세요.` });
       fetchAvailableTimes(selectedDoctor?.doctorId, parsedDate);
-      setCurrentStep(3); // 시간 선택 단계로 이동
     } else {
+      speak({ text: '유효한 날짜를 말씀해주세요.' });
       startListening();
     }
   };
-  // 시간 선택
+
   const handleTimeSelection = (command) => {
     const parsedTime = parseTime(command);
     if (parsedTime) {
       checkAvailability(selectedDate, parsedTime);
+      setCurrentStep(4); // Prevent repeated processing of the same step
     } else {
       speak({ text: '유효한 시간을 입력해주세요.' });
       startListening();
     }
-  };
-
-  const fetchFullyBookedDates = (doctorId) => {
-    axios.get(`${process.env.REACT_APP_API_SERVER}/api/reservations/fully-booked-dates`, {
-      params: { doctorId },
-      withCredentials: true
-    })
-    .then((response) => {
-      setFullyBookedDates(response.data);
-    })
-    .catch((error) => {
-      console.error('Error fetching fully booked dates:', error);
-    });
-  };
-
-  const fetchAvailableTimes = (doctorId, date) => {
-    const token = localStorage.getItem('accessToken');
-    axios.get(`${process.env.REACT_APP_API_SERVER}/api/reservations/available-times`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'X-XSRF-TOKEN': csrfToken
-      },
-      params: { doctorId, date },
-      withCredentials: true
-    })
-    .then((response) => {
-      setAvailableTimes(response.data);
-    })
-    .catch((error) => {
-      console.error('Error fetching available times:', error);
-    });
   };
 
   const checkAvailability = (date, time) => {
@@ -323,9 +351,12 @@ const VoiceReservationSystem = () => {
     })
       .then((response) => {
         if (response.data.available) {
-          makeReservation(date, time);
+          speak({ text: `${selectedDoctor.name} 의사의 ${date} ${time}에 예약하시겠습니까? 네 또는 아니오로 답변해 주세요.` });
+          setIsConfirmingReservation(true);
+          setPendingReservation({ date, time });
+          startListening();
         } else {
-          speak({ text: '이미 예약이 있습니다. 다른 시간을 선택해주세요.' });
+          speak({ text: '이미 선택한 날짜와 시간에 예약이 있습니다. 다른 시간을 선택해주세요.' });
           startListening();
         }
       })
@@ -334,13 +365,6 @@ const VoiceReservationSystem = () => {
         speak({ text: '예약 확인 중 오류가 발생했습니다. 다시 시도해주세요.' });
         startListening();
       });
-  };
-
-const handleTimeClick = (time) => {
-    const confirmReservation = window.confirm('예약하시겠습니까?');
-    if (confirmReservation) {
-      checkAvailability(selectedDate, time);
-    }
   };
 
   const makeReservation = (date, time) => {
@@ -369,11 +393,54 @@ const handleTimeClick = (time) => {
         speak({ text: '예약 중 오류가 발생했습니다. 다시 시도해주세요.' });
       });
   };
+  const fetchFullyBookedDates = (doctorId) => {
+    axios.get(`${process.env.REACT_APP_API_SERVER}/api/reservations/fully-booked-dates`, {
+      params: { doctorId },
+      withCredentials: true
+    })
+    .then((response) => {
+      setFullyBookedDates(response.data);
+    })
+    .catch((error) => {
+      console.error('Error fetching fully booked dates:', error);
+    });
+  };
+  const fetchAvailableTimes = (doctorId, date) => {
+    const token = localStorage.getItem('accessToken');
+    axios.get(`${process.env.REACT_APP_API_SERVER}/api/reservations/available-times`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'X-XSRF-TOKEN': csrfToken
+      },
+      params: { doctorId, date },
+      withCredentials: true
+    })
+    .then((response) => {
+      setAvailableTimes(response.data);
+    })
+    .catch((error) => {
+      console.error('Error fetching available times:', error);
+    });
+  };
+const handleTimeClick = (time) => {
+    const confirmReservation = window.confirm('예약하시겠습니까?');
+    if (confirmReservation) {
+      checkAvailability(selectedDate, time);
+    }
+  };
+  const handleDateClick = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
 
+    setSelectedDate(formattedDate);
+    fetchAvailableTimes(selectedDoctor?.doctorId, formattedDate);
+  };
   const parseDate = (response) => {
-    const match = response.match(/\d+/g);
-    if (match && match.length >= 2) {
-      const [month, day] = match;
+    const match = response.match(/(\d{1,2})월\s*(\d{1,2})일?/);
+    if (match) {
+      const [_, month, day] = match;
       const year = new Date().getFullYear();
       return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     }
@@ -381,12 +448,16 @@ const handleTimeClick = (time) => {
   };
 
   const parseTime = (response) => {
-    const match = response.match(/\d{1,2}/);
-    if (match) {
-      return `${match[0].padStart(2, '0')}:00`;
+    const timeMatch = response.match(/(오전|오후)?\s*(\d{1,2})시/);
+    if (timeMatch) {
+      let hour = parseInt(timeMatch[2], 10);
+      if (timeMatch[1] === '오후' && hour < 12) hour += 12;
+      else if (timeMatch[1] === '오전' && hour === 12) hour = 0;
+      return `${String(hour).padStart(2, '0')}:00`;
     }
     return null;
   };
+  
 
   return (
     <ReservationContainer>
@@ -410,13 +481,29 @@ const handleTimeClick = (time) => {
               selectedDate={selectedDate}
             />
       </AvailableTimesContainer>
-      <Transcript>
-        <strong>인식된 텍스트 :</strong> {recognizedText}
-      </Transcript>
-      <ControlPanelContainer>
-        <Button onClick={startVoiceReservation}>음성 예약 시작</Button>
-        <Button onClick={handleStopListening}>응답 종료</Button>
-      </ControlPanelContainer>
+      <TranscriptContainer>
+              <h3>음성 인식 기록</h3>
+              <ResponseList>
+                {userCommands.map((command, index) => (
+                  <li key={index}>{command}</li>
+                ))}
+              </ResponseList>
+              <CurrentTranscript>
+                <FaMicrophone />
+                {transcript || '음성을 인식하면 여기에 표시됩니다...'}
+              </CurrentTranscript>
+            </TranscriptContainer>
+            
+        <ButtonGroup>
+          <Button onClick={startVoiceReservation}>음성 안내 시작</Button>
+          <Button
+            onClick={toggleListening}
+            style={{ backgroundColor: isListening ? '#f44336' : '#2260ff' }}
+          >
+            {isListening ? '응답 종료' : '응답 시작'}
+          </Button>
+          <Button onClick={handleReset}>초기화</Button>
+        </ButtonGroup>
 
       {/* 하단 네비게이션 바 추가 */}
       <BottomNavBar>
