@@ -317,7 +317,7 @@ const VoiceReservationSystem = () => {
   };
 
   const startVoiceReservation = () => {
-    speak({ text: '예약 날짜와 시간 선택하는 화면입니다. 예약할 날짜를 말씀해주세요.' });
+    speak({ text: '예약 날짜와 시간 선택하는 화면입니다. 예약 하실 날짜를 말씀해주세요.' });
     setCurrentStep(2); // Move to the date selection step
     startListening();
   };
@@ -327,12 +327,12 @@ const VoiceReservationSystem = () => {
 
     if (isConfirmingReservation) {
       // Handle reservation confirmation step
-      if (command.includes('네') || command.includes('예') || command.includes('좋습니다')) {
+      if (command.includes('네') || command.includes('예') || command.includes('좋습니다') || command.includes('옙') || command.includes('넵') || command.includes('네네') || command.includes('네에') ) {
         setIsConfirmingReservation(false);
         if (pendingReservation) {
           makeReservation(pendingReservation.date, pendingReservation.time);
         }
-      } else if (command.includes('아니오') || command.includes('아니요') || command.includes('취소')) {
+      } else if (command.includes('아니오') || command.includes('아니요') || command.includes('취소')) {ㄴ
         speak({ text: '예약이 취소되었습니다. 다른 시간을 선택해주세요.' });
         setIsConfirmingReservation(false);
         setPendingReservation(null);
@@ -356,7 +356,7 @@ const VoiceReservationSystem = () => {
     if (parsedDate) {
       setSelectedDate(parsedDate);
       setCurrentStep(3); // Move to the time selection step
-      speak({ text: `${parsedDate} 날짜를 선택하셨습니다. 예약할 시간을 말해주세요.` });
+      speak({ text: `${parsedDate} 날짜를 선택하셨습니다. 예약 하실 시간을 말해주세요.` });
       fetchAvailableTimes(selectedDoctor?.doctorId, parsedDate);
     } else {
       speak({ text: '유효한 날짜를 말씀해주세요.' });
@@ -387,7 +387,7 @@ const VoiceReservationSystem = () => {
     })
       .then((response) => {
         if (response.data.available) {
-          speak({ text: `${selectedDoctor.name} 의사의 ${date} ${time}에 예약하시겠습니까? 네 또는 아니오로 답변해 주세요.` });
+          speak({ text: `${selectedDoctor.name} 의사의 ${date} ${time}에 예약하시겠습니까?` });
           setIsConfirmingReservation(true);
           setPendingReservation({ date, time });
           startListening();

@@ -199,7 +199,7 @@ const VoiceGuide = () => {
   } = useSpeechRecognition({
     commands: [
       {
-        command: '네',
+        command: '네' || '응' || '넵'|| '네네'|| '네에'|| '어',
         callback: () => handleUserResponse('네'),
       },
       {
@@ -223,7 +223,7 @@ const VoiceGuide = () => {
     setError(null);
     resetTranscript();
     speak({
-      text: '안녕하세요. 음성 안내 예약 시스템을 사용하기 전에 몇 가지 주의사항을 알려드리겠습니다. 이 시스템은 음성 인식 기술을 사용하여 예약을 진행하니, 정확한 인식을 위해 조용한 환경에서 사용해 주세요. 또한, 이 대화는 품질 개선을 위해 녹음될 수 있습니다. 응답 시작 버튼을 누르고 응답 후 응답 종료 버튼을 누르시면 됩니다. 예약을 진행하시겠습니까?',
+      text: '안녕하세요. 음성 진료 예약 서비스를 이용하기 위해 몇 가지 주의사항을 알려드리겠습니다. 이 서비스는 음성 인식을 사용하여 예약을 진행하니, 정확한 음성 인식을 위해 조용한 환경에서 사용해 주세요. 또한, 이 대화는 품질 개선을 위해 녹음을 진행하고 있습니다. 응답 시작 버튼을 누르고 응답해주시면 됩니다. 예약을 진행하시겠습니까?',
       lang: 'ko-KR',
     });
   };
@@ -252,8 +252,7 @@ const VoiceGuide = () => {
 
   const handleUserResponse = (response) => {
     const lowerResponse = response.toLowerCase();
-    if (lowerResponse.includes('네') || lowerResponse.includes('예') || 
-        lowerResponse.includes('응') || lowerResponse.includes('어')) {
+    if (lowerResponse.includes('네')) {
       navigate('/Voice/DepartmentDoctorSelection');
     } else if (lowerResponse.includes('아니') || lowerResponse.includes('아니요')) {
       navigate('/member/dashboard');

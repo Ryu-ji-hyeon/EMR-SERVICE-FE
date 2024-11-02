@@ -228,7 +228,7 @@ const DepartmentDoctorSelection = () => {
     setTimeout(() => SpeechRecognition.startListening({ continuous: true, language: 'ko-KR' }), 3000);
   };
 
-  const startVoiceGuide = () => speakQuestion('부서 안내 화면입니다. 부서 이름 듣고 싶으십니까?');
+  const startVoiceGuide = () => speakQuestion('부서 안내 화면입니다. 부서 전체 이름 듣고 싶으십니까?');
 
   const handleDepartmentSelection = async (command) => {
     const selectedDept = availableDepartments.find(dept => dept.deptName === command);
@@ -253,7 +253,7 @@ const DepartmentDoctorSelection = () => {
             handleDoctorSelection(doctors[0].doctorName);
           } else {
             const doctorNames = doctors.map(doc => doc.doctorName).join(', ');
-            speakQuestion(`선택한 ${selectedDept.deptName} 부서의 의사 목록은 다음과 같습니다: ${doctorNames}. 선택할 의사 이름을 말해주세요.`);
+            speakQuestion(`선택한 ${selectedDept.deptName} 부서의 의사 목록은 다음과 같습니다: ${doctorNames}. 예약 하실 의사 이름을 말해주세요.`);
             setCurrentStep(2);
           }
         } else {
@@ -280,7 +280,7 @@ const DepartmentDoctorSelection = () => {
           params: { date: new Date().toISOString().split('T')[0] },
           withCredentials: true
         });
-        speakQuestion(`선택한 ${selectedDoctor.doctorName} 의사의 예약 화면으로 넘어가겠습니다. 음성 안내 시작 버튼을 누르고 예약 진행해주세요`);
+        speakQuestion(`선택한 ${selectedDoctor.doctorName} 의사의 예약 화면입니다. 음성 안내 시작 버튼을 누르고 예약 진행해주세요`);
         const reservations = response.data;
 
         navigate('/Voice/ReservationScreen', {
