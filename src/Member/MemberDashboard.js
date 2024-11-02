@@ -153,7 +153,6 @@ const MemberDashboard = () => {
     <ScreenWrapper>
       <MainContent>
         <Content>
-          <CardTitle>환자 대시보드</CardTitle>
           <ButtonContainer>
             <NavLink to="/reservation-choice">
               <FaCalendarPlus />
@@ -163,7 +162,7 @@ const MemberDashboard = () => {
               <FaCalendarCheck />
               예약 확인
             </NavLink>
-            <NavLink to="/prescriptions">
+            <NavLink to="/member/reservations">
               <FaPrescriptionBottleAlt />
               처방전 확인
             </NavLink>
