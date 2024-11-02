@@ -273,7 +273,7 @@ const VoiceGuide = () => {
           <FaArrowLeft />
         </BackButton>
         <Content>
-          <Title>음성 예약 안내</Title>
+          <Title>음성 진료 예약 서비스</Title>
           <Card>
             <ButtonGroup>
               <Button onClick={startVoiceGuide}>

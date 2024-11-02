@@ -280,7 +280,7 @@ const DepartmentDoctorSelection = () => {
           params: { date: new Date().toISOString().split('T')[0] },
           withCredentials: true
         });
-        speakQuestion(`선택한 ${selectedDoctor.doctorName} 의사의 예약 화면으로 넘어가겠습니다. 음성 예약 시작 버튼을 누르고 예약 진행해주세요`);
+        speakQuestion(`선택한 ${selectedDoctor.doctorName} 의사의 예약 화면으로 넘어가겠습니다. 음성 안내 시작 버튼을 누르고 예약 진행해주세요`);
         const reservations = response.data;
 
         navigate('/Voice/ReservationScreen', {
@@ -339,7 +339,7 @@ const DepartmentDoctorSelection = () => {
           <FaArrowLeft />
         </BackButton>
         <Content>
-          <Title>음성 예약 시스템</Title>
+          <Title>음성 진료 예약 서비스</Title>
           <Card>
             <ButtonGroup>
               <Button onClick={startVoiceGuide}>음성 안내 시작</Button>

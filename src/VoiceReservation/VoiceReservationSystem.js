@@ -510,7 +510,7 @@ const VoiceReservationSystem = () => {
          <BackButton onClick={handleGoBack}>
           <FaArrowLeft />
         </BackButton>
-      <Title>음성 진료 예약 시스템</Title>
+      <Title>음성 진료 예약 서비스</Title>
 	
       <CalendarContainer>
       <ResulvationCalender 
