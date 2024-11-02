@@ -33,7 +33,7 @@ const ButtonContainer = styled.div`
   align-items: center;
   justify-content: center;
   gap: 1.5rem;
-  margin-top: 17rem; /* 상단 여백을 더 크게 설정하여 버튼들을 아래로 내림 */
+  margin-top: 10rem; /* 상단 여백을 더 크게 설정하여 버튼들을 아래로 내림 */
   margin-bottom: 2rem;
 
   @media (min-width: 768px) {
@@ -50,7 +50,7 @@ const Button = styled.button`
   align-items: center;
   justify-content: center;
   padding: 4.5rem 4rem; /* 버튼 크기 조정 */
-  font-size: 1.2rem;
+  font-size: 2.0rem;
   color: #fff;
   border: none;
   text-decoration: none;
