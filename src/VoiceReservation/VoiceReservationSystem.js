@@ -196,6 +196,40 @@ const ButtonGroup = styled.div`
   margin-top: 1rem;
 `;
 
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+`;
+
+const ModalButton = styled.button`
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  &:hover {
+    background-color: #e6e6e6;
+  }
+`;
+
 const VoiceReservationSystem = () => {
   const { speak, cancel } = useSpeechSynthesis();
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
@@ -213,6 +247,8 @@ const VoiceReservationSystem = () => {
   const [pendingReservation, setPendingReservation] = useState(null);
   const [isListening, setIsListening] = useState(false);
   const [userCommands, setUserCommands] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [selectedTime, setSelectedTime] = useState(null);
 
   const handleGoBack = () => {
     navigate('/Voice/DepartmentDoctorSelection'); // ReservationChoice로 이동
@@ -367,6 +403,7 @@ const VoiceReservationSystem = () => {
       });
   };
 
+
   const makeReservation = (date, time) => {
     const token = localStorage.getItem('accessToken');
     axios.post(`${process.env.REACT_APP_API_SERVER}/api/reservations/reserve`, null, {
@@ -422,11 +459,18 @@ const VoiceReservationSystem = () => {
       console.error('Error fetching available times:', error);
     });
   };
-const handleTimeClick = (time) => {
-    const confirmReservation = window.confirm('예약하시겠습니까?');
-    if (confirmReservation) {
-      checkAvailability(selectedDate, time);
-    }
+  const handleTimeClick = (time) => {
+    setSelectedTime(time);
+    setIsModalOpen(true); // Show the confirmation modal
+  };
+
+  const confirmReservation = () => {
+    setIsModalOpen(false);
+    checkAvailability(selectedDate, selectedTime); // Check availability for the selected time
+  };
+  const cancelReservation = () => {
+    setIsModalOpen(false);
+    setSelectedTime(null); // Clear selected time if the user cancels
   };
   const handleDateClick = (date) => {
     const year = date.getFullYear();
@@ -504,26 +548,39 @@ const handleTimeClick = (time) => {
           </Button>
           <Button onClick={handleReset}>초기화</Button>
         </ButtonGroup>
+        {isModalOpen && (
+          <ModalOverlay>
+            <ModalContent>
+              <p>선택하신 시간 {selectedTime}으로 예약하시겠습니까?</p>
+              <div>
+                <ModalButton onClick={confirmReservation}>예</ModalButton>
+                <ModalButton onClick={cancelReservation}>아니오</ModalButton>
+              </div>
+            </ModalContent>
+          </ModalOverlay>
+        )}
 
       {/* 하단 네비게이션 바 추가 */}
-      <BottomNavBar>
-          <NavIcon onClick={() => navigate('/member/dashboard')}>
-            <FaHome />
-            <span>홈</span>
-          </NavIcon>
-          <NavIcon onClick={() => navigate('/reservation-choice')}>
-            <FaCalendarCheck />
-            <span>예약</span>
-          </NavIcon>
-          <NavIcon onClick={() => navigate('/member/profile')}>
-            <FaUser />
-            <span>프로필</span>
-          </NavIcon>
-          <NavIcon onClick={() => navigate('/')}>
-            <FaCog />
-            <span>로그아웃</span>
-          </NavIcon>
-        </BottomNavBar>
+      {!isModalOpen && (
+                <BottomNavBar>
+                  <NavIcon onClick={() => navigate('/member/dashboard')}>
+                    <FaHome />
+                    <span>홈</span>
+                  </NavIcon>
+                  <NavIcon onClick={() => navigate('/reservation-choice')}>
+                    <FaCalendarCheck />
+                    <span>예약</span>
+                  </NavIcon>
+                  <NavIcon onClick={() => navigate('/member/profile')}>
+                    <FaUser />
+                    <span>프로필</span>
+                  </NavIcon>
+                  <NavIcon onClick={() => navigate('/')}>
+                    <FaCog />
+                    <span>로그아웃</span>
+                  </NavIcon>
+                </BottomNavBar>
+              )}
       </MainContent>
     </ReservationContainer>
   );

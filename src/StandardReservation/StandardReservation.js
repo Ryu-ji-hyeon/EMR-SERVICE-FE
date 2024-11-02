@@ -166,6 +166,40 @@ const NavIcon = styled.div`
   }
 `;
 
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+`;
+
+const ModalButton = styled.button`
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  &:hover {
+    background-color: #e6e6e6;
+  }
+`;
+
 
 const StandardReservation = () => {
   const [availableTimes, setAvailableTimes] = useState([]);
@@ -176,9 +210,11 @@ const StandardReservation = () => {
   const [csrfToken, setCsrfToken] = useState('');
   const navigate = useNavigate();
   const [patientId, setPatientId] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(null); 
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleGoBack = () => {
-    navigate('/standard-reservation'); // ReservationChoice로 이동
+    navigate('/standard-reservation');
   };
 
   useEffect(() => {
@@ -257,10 +293,13 @@ const StandardReservation = () => {
   };
 
   const handleTimeClick = (time) => {
-    const confirmReservation = window.confirm('예약하시겠습니까?');
-    if (confirmReservation) {
-      checkAvailability(selectedDate, time);
-    }
+    setSelectedTime(time);
+    setIsModalOpen(true); // Show the confirmation modal
+  };
+
+  const confirmReservation = () => {
+    setIsModalOpen(false);
+    checkAvailability(selectedDate, selectedTime);
   };
 
   const checkAvailability = (date, time) => {
@@ -317,41 +356,54 @@ const StandardReservation = () => {
   return (
     <ScreenContainer>
       <MainContent>
-        {/* 뒤로 가기 버튼 추가 */}
         <BackButton onClick={handleGoBack}>
           <FaArrowLeft />
         </BackButton>
-      <Content>
-        <Title>일반 예약 시스템</Title>
-        {selectedDoctor && (
-          <Layout>
-            <CompactCalendar onDateClick={handleDateClick} fullyBookedDates={fullyBookedDates} />
-            <CompactTimes availableTimes={availableTimes} onTimeClick={handleTimeClick} selectedDate={selectedDate} />
-          </Layout>
-        )}
-      </Content>
+        <Content>
+          <Title>일반 예약 시스템</Title>
+          {selectedDoctor && (
+            <Layout>
+              <CompactCalendar onDateClick={handleDateClick} fullyBookedDates={fullyBookedDates} />
+              <CompactTimes availableTimes={availableTimes} onTimeClick={handleTimeClick} selectedDate={selectedDate} />
+            </Layout>
+          )}
+        </Content>
 
-      {/* 하단 네비게이션 바 추가 */}
-      <BottomNavBar>
-          <NavIcon onClick={() => navigate('/member/dashboard')}>
-            <FaHome />
-            <span>홈</span>
-          </NavIcon>
-          <NavIcon onClick={() => navigate('/reservation-choice')}>
-            <FaCalendarCheck />
-            <span>예약</span>
-          </NavIcon>
-          <NavIcon onClick={() => navigate('/member/profile')}>
-            <FaUser />
-            <span>프로필</span>
-          </NavIcon>
-          <NavIcon onClick={() => navigate('/')}>
-            <FaCog />
-            <span>로그아웃</span>
-          </NavIcon>
-        </BottomNavBar>
-      </MainContent>
-    </ScreenContainer>
+        {/* Confirmation Modal */}
+        {isModalOpen && (
+          <ModalOverlay>
+            <ModalContent>
+              <p>선택하신 시간 {selectedTime}으로 예약하시겠습니까?</p>
+              <div>
+                <ModalButton onClick={confirmReservation}>예</ModalButton>
+                <ModalButton onClick={() => setIsModalOpen(false)}>아니오</ModalButton>
+              </div>
+            </ModalContent>
+          </ModalOverlay>
+        )}
+
+      {!isModalOpen && (
+                <BottomNavBar>
+                  <NavIcon onClick={() => navigate('/member/dashboard')}>
+                    <FaHome />
+                    <span>홈</span>
+                  </NavIcon>
+                  <NavIcon onClick={() => navigate('/reservation-choice')}>
+                    <FaCalendarCheck />
+                    <span>예약</span>
+                  </NavIcon>
+                  <NavIcon onClick={() => navigate('/member/profile')}>
+                    <FaUser />
+                    <span>프로필</span>
+                  </NavIcon>
+                  <NavIcon onClick={() => navigate('/')}>
+                    <FaCog />
+                    <span>로그아웃</span>
+                  </NavIcon>
+                </BottomNavBar>
+              )}
+            </MainContent>
+          </ScreenContainer>
   );
 };
 
