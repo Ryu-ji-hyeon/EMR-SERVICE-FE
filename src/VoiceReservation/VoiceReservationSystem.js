@@ -332,7 +332,7 @@ const VoiceReservationSystem = () => {
         if (pendingReservation) {
           makeReservation(pendingReservation.date, pendingReservation.time);
         }
-      } else if (command.includes('아니오') || command.includes('아니요') || command.includes('취소')) {ㄴ
+      } else if (command.includes('아니오') || command.includes('아니요') || command.includes('취소')) {
         speak({ text: '예약이 취소되었습니다. 다른 시간을 선택해주세요.' });
         setIsConfirmingReservation(false);
         setPendingReservation(null);
