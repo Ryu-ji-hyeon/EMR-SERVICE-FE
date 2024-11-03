@@ -158,12 +158,49 @@ const NavIcon = styled.div`
   }
 `;
 
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+`;
+
+const ModalButton = styled.button`
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  &:hover {
+    background-color: #e6e6e6;
+  }
+`;
+
 const MemberUpdatePassword = () => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [csrfToken, setCsrfToken] = useState(''); // CSRF 토큰 상태 추가
   const [confirmPassword, setConfirmPassword] = useState('');
   const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalRedirect, setModalRedirect] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -187,51 +224,58 @@ const MemberUpdatePassword = () => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-  
     if (newPassword !== confirmPassword) {
-      alert('새 비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+      setModalMessage('새 비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+      setIsModalOpen(true);
       return;
     }
-  
-    const token = localStorage.getItem('accessToken'); // JWT 토큰
-    const csrfToken = await fetchCsrfToken(); // CSRF 토큰 가져오기
-  
+
+    const token = localStorage.getItem('accessToken');
+    const csrfToken = await fetchCsrfToken();
+
     try {
-      // 비밀번호 업데이트 API 호출
       await axios.post(
         `${process.env.REACT_APP_API_SERVER}/api/member/updatePassword`,
         {
-          patientPw: currentPassword, // 기존 비밀번호는 DTO의 patientPw로 전송
-          newPassword,                // 새 비밀번호는 newPassword로 전송
-          confirmPassword,            // 확인 비밀번호는 confirmPassword로 전송
+          patientPw: currentPassword,
+          newPassword,
+          confirmPassword,
         },
         {
           headers: {
-            'Authorization': `Bearer ${token}`, // JWT 인증 토큰
-            'X-XSRF-TOKEN': csrfToken,          // CSRF 토큰 추가
+            'Authorization': `Bearer ${token}`,
+            'X-XSRF-TOKEN': csrfToken,
           },
-          withCredentials: true, // 쿠키 전송을 위한 옵션 설정
+          withCredentials: true,
         }
       );
-      alert('비밀번호가 성공적으로 변경되었습니다.');
-      navigate('/member/profile');
+      setModalMessage('비밀번호가 성공적으로 변경되었습니다.');
+      setModalRedirect('/member/profile'); // Redirect to profile after success
+      setIsModalOpen(true);
     } catch (error) {
       console.error('Error updating password:', error);
-      alert('비밀번호 변경에 실패했습니다.');
+      setModalMessage('현재 비밀번호가 올바르지 않습니다.');
+      setIsModalOpen(true);
     }
   };
-  
-  
+
   const handleGoBack = () => {
     navigate('/member/dashboard');
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    if (modalRedirect) {
+      navigate(modalRedirect);
+    }
   };
 
   return (
     <ScreenWrapper>
       <MainContent>
-      <BackButton onClick={handleGoBack}>
-            <FaArrowLeft />
-          </BackButton>
+        <BackButton onClick={handleGoBack}>
+          <FaArrowLeft />
+        </BackButton>
         <Title>비밀번호 변경</Title>
         <Form onSubmit={handleFormSubmit}>
           <InputGroup>
@@ -269,24 +313,35 @@ const MemberUpdatePassword = () => {
           </InputGroup>
           <Button type="submit">비밀번호 변경</Button>
         </Form>
+
         <BottomNavBar>
-            <NavIcon onClick={() => navigate('/member/dashboard')}>
-              <FaHome />
-              <span>홈</span>
-            </NavIcon>
-            <NavIcon onClick={() => navigate('/reservation-choice')}>
-              <FaCalendarCheck />
-              <span>예약</span>
-            </NavIcon>
-            <NavIcon onClick={() => navigate('/member/profile')}>
-              <FaUser />
-              <span>프로필</span>
-            </NavIcon>
-            <NavIcon onClick={() => navigate('/')}>
-              <FaCog />
-              <span>로그아웃</span>
-            </NavIcon>
-          </BottomNavBar>
+          <NavIcon onClick={() => navigate('/member/dashboard')}>
+            <FaHome />
+            <span>홈</span>
+          </NavIcon>
+          <NavIcon onClick={() => navigate('/reservation-choice')}>
+            <FaCalendarCheck />
+            <span>예약</span>
+          </NavIcon>
+          <NavIcon onClick={() => navigate('/member/profile')}>
+            <FaUser />
+            <span>프로필</span>
+          </NavIcon>
+          <NavIcon onClick={() => navigate('/')}>
+            <FaCog />
+            <span>로그아웃</span>
+          </NavIcon>
+        </BottomNavBar>
+
+        {/* Modal for alerts */}
+        {isModalOpen && (
+          <ModalOverlay>
+            <ModalContent>
+              <p>{modalMessage}</p>
+              <ModalButton onClick={closeModal}>확인</ModalButton>
+            </ModalContent>
+          </ModalOverlay>
+        )}
       </MainContent>
     </ScreenWrapper>
   );

@@ -173,6 +173,40 @@ const BottomNavBar = styled.div`
   z-index: 1000;
 `;
 
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+`;
+
+const ModalButton = styled.button`
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  &:hover {
+    background-color: #e6e6e6;
+  }
+`;
+
 const MemberEdit = () => {
   const [memberInfo, setMemberInfo] = useState({
     patientName: '',
@@ -185,6 +219,9 @@ const MemberEdit = () => {
   const [loading, setLoading] = useState(true);
   const [csrfToken, setCsrfToken] = useState('');
   const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalRedirect, setModalRedirect] = useState(null);
 
   useEffect(() => {
     // 기존 회원 정보 가져오기
@@ -228,126 +265,144 @@ const MemberEdit = () => {
 }, []);
 
 const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    try {
-        // 회원 정보 업데이트 요청 시 CSRF 토큰을 함께 보냄
-        await axios.put(`${process.env.REACT_APP_API_SERVER}/api/member/update`, memberInfo, {
-            withCredentials: true,
-            headers: {
-                'X-XSRF-TOKEN': csrfToken,  // CSRF 토큰을 헤더에 추가
-            },
-        });
-        alert('회원 정보가 성공적으로 수정되었습니다.');
-        navigate('/member/profile'); // 프로필 페이지로 이동
-    } catch (error) {
-        console.error('Error updating member info:', error);
-        alert('회원 정보 수정에 실패했습니다.');
-    }
+  e.preventDefault();
+  try {
+    // Send member info update request with CSRF token
+    await axios.put(`${process.env.REACT_APP_API_SERVER}/api/member/update`, memberInfo, {
+      withCredentials: true,
+      headers: {
+        'X-XSRF-TOKEN': csrfToken,
+      },
+    });
+    setModalMessage('회원 정보가 성공적으로 수정되었습니다.');
+    setModalRedirect('/member/profile'); // Redirect after success
+    setIsModalOpen(true);
+  } catch (error) {
+    console.error('Error updating member info:', error);
+    setModalMessage('회원 정보 수정에 실패했습니다.');
+    setIsModalOpen(true);
+  }
 };
 
-
-  if (loading) {
-    return <p>Loading...</p>;
+const closeModal = () => {
+  setIsModalOpen(false);
+  if (modalRedirect) {
+    navigate(modalRedirect);
   }
+};
 
-  return (
-    <ScreenWrapper>
-      <MainContent>
-        <BackButton onClick={() => navigate('/member/profile')}>
-          <FaArrowLeft />
-        </BackButton>
-        <Title>회원 정보 수정</Title>
-        <Form onSubmit={handleFormSubmit}>
-          <InputGroup>
-            <Label htmlFor="patientName">이름</Label>
-            <Input
-              id="patientName"
-              name="patientName"
-              value={memberInfo.patientName}
-              onChange={handleInputChange}
-            />
-          </InputGroup>
-          <InputGroup>
-            <Label htmlFor="gender">성별</Label>
-            <Select
-              id="gender"
-              name="gender"
-              value={memberInfo.gender}
-              onChange={handleInputChange}
-            >
-              <option value="">선택</option>
-              <option value="남">남</option>
-              <option value="여">여</option>
-            </Select>
-          </InputGroup>
-          <InputGroup>
-            <Label htmlFor="age">나이</Label>
-            <Input
-              id="age"
-              name="age"
-              type="number"
-              value={memberInfo.age}
-              onChange={handleInputChange}
-            />
-          </InputGroup>
-          <InputGroup>
-            <Label htmlFor="weight">몸무게</Label>
-            <Input
-              id="weight"
-              name="weight"
-              type="number"
-              value={memberInfo.weight}
-              onChange={handleInputChange}
-            />
-          </InputGroup>
-          <InputGroup>
-            <Label htmlFor="height">키</Label>
-            <Input
-              id="height"
-              name="height"
-              type="number"
-              value={memberInfo.height}
-              onChange={handleInputChange}
-            />
-          </InputGroup>
-          <InputGroup>
-            <Label htmlFor="bloodType">혈액형</Label>
-            <Select
-              id="bloodType"
-              name="bloodType"
-              value={memberInfo.bloodType}
-              onChange={handleInputChange}
-            >
-              <option value="">선택</option>
-              <option value="A">A</option>
-              <option value="B">B</option>
-              <option value="AB">AB</option>
-              <option value="O">O</option>
-            </Select>
-          </InputGroup>
-          <Button type="submit">정보 수정</Button>
-        </Form>
-        <BottomNavBar>
-          <NavIcon onClick={() => navigate('/member/dashboard')}>
-            <FaHome />
-            <span>홈</span>
-          </NavIcon>
-          <NavIcon onClick={() => navigate('/reservation-choice')}>
-            <FaCalendarCheck />
-            <span>예약</span>
-          </NavIcon>
-          <NavIcon onClick={() => navigate('/member/profile')}>
-            <FaUser />
-            <span>프로필</span>
-          </NavIcon>
-          <NavIcon onClick={() => navigate('/')}>
-            <FaCog />
-            <span>로그아웃</span>
-          </NavIcon>
-        </BottomNavBar>
-      </MainContent>
-    </ScreenWrapper>
-  );
+if (loading) {
+  return <p>Loading...</p>;
+}
+
+return (
+  <ScreenWrapper>
+    <MainContent>
+      <BackButton onClick={() => navigate('/member/profile')}>
+        <FaArrowLeft />
+      </BackButton>
+      <Title>회원 정보 수정</Title>
+      <Form onSubmit={handleFormSubmit}>
+        <InputGroup>
+          <Label htmlFor="patientName">이름</Label>
+          <Input
+            id="patientName"
+            name="patientName"
+            value={memberInfo.patientName}
+            onChange={handleInputChange}
+          />
+        </InputGroup>
+        <InputGroup>
+          <Label htmlFor="gender">성별</Label>
+          <Select
+            id="gender"
+            name="gender"
+            value={memberInfo.gender}
+            onChange={handleInputChange}
+          >
+            <option value="">선택</option>
+            <option value="남">남</option>
+            <option value="여">여</option>
+          </Select>
+        </InputGroup>
+        <InputGroup>
+          <Label htmlFor="age">나이</Label>
+          <Input
+            id="age"
+            name="age"
+            type="number"
+            value={memberInfo.age}
+            onChange={handleInputChange}
+          />
+        </InputGroup>
+        <InputGroup>
+          <Label htmlFor="weight">몸무게</Label>
+          <Input
+            id="weight"
+            name="weight"
+            type="number"
+            value={memberInfo.weight}
+            onChange={handleInputChange}
+          />
+        </InputGroup>
+        <InputGroup>
+          <Label htmlFor="height">키</Label>
+          <Input
+            id="height"
+            name="height"
+            type="number"
+            value={memberInfo.height}
+            onChange={handleInputChange}
+          />
+        </InputGroup>
+        <InputGroup>
+          <Label htmlFor="bloodType">혈액형</Label>
+          <Select
+            id="bloodType"
+            name="bloodType"
+            value={memberInfo.bloodType}
+            onChange={handleInputChange}
+          >
+            <option value="">선택</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="AB">AB</option>
+            <option value="O">O</option>
+          </Select>
+        </InputGroup>
+        <Button type="submit">정보 수정</Button>
+      </Form>
+      <BottomNavBar>
+        <NavIcon onClick={() => navigate('/member/dashboard')}>
+          <FaHome />
+          <span>홈</span>
+        </NavIcon>
+        <NavIcon onClick={() => navigate('/reservation-choice')}>
+          <FaCalendarCheck />
+          <span>예약</span>
+        </NavIcon>
+        <NavIcon onClick={() => navigate('/member/profile')}>
+          <FaUser />
+          <span>프로필</span>
+        </NavIcon>
+        <NavIcon onClick={() => navigate('/')}>
+          <FaCog />
+          <span>로그아웃</span>
+        </NavIcon>
+      </BottomNavBar>
+
+      {/* Modal for alerts */}
+      {isModalOpen && (
+        <ModalOverlay>
+          <ModalContent>
+            <p>{modalMessage}</p>
+            <ModalButton onClick={closeModal}>확인</ModalButton>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+    </MainContent>
+  </ScreenWrapper>
+);
 };
 
 export default MemberEdit;

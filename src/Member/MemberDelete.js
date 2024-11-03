@@ -159,59 +159,108 @@ const NavIcon = styled.div`
   }
 `;
 
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+`;
+
+const ModalButton = styled.button`
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  &:hover {
+    background-color: #e6e6e6;
+  }
+`;
+
 // 회원 탈퇴 컴포넌트
 const MemberDelete = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const handleDeleteAccount = async (e) => {
     e.preventDefault();
     if (!password) {
-        alert('비밀번호를 입력해 주세요.');
-        return;
+      setModalMessage('비밀번호를 입력해 주세요.');
+      setIsModalOpen(true);
+      return;
     }
 
-    if (window.confirm('정말로 회원 탈퇴를 하시겠습니까?')) {
-        setLoading(true);
-        const token = localStorage.getItem('accessToken'); // JWT 토큰
+    setShowConfirmation(true); // Show confirmation modal
+  };
 
-        try {
-            // 회원 탈퇴 API 호출 (POST 사용)
-            await axios.post(`${process.env.REACT_APP_API_SERVER}/api/member/delete`, 
-            {
-              password // 비밀번호를 POST body로 전달
-            },
-            {
-                headers: {
-                    'Authorization': `Bearer ${token}`, // JWT 인증 토큰
-                    'X-XSRF-TOKEN': await fetchCsrfToken(), // CSRF 토큰 전달
-                },
-                withCredentials: true, // 쿠키 전송 설정
-            });
-            alert('회원 탈퇴가 완료되었습니다.');
-            localStorage.removeItem('accessToken'); // 토큰 삭제
-            navigate('/'); // 메인 페이지로 리다이렉트
-        } catch (error) {
-            console.error('Error deleting account:', error);
-            alert('회원 탈퇴에 실패했습니다.');
-        } finally {
-            setLoading(false);
+  const confirmDeleteAccount = async () => {
+    setLoading(true);
+    const token = localStorage.getItem('accessToken');
+    setShowConfirmation(false);
+
+    try {
+      // 회원 탈퇴 API 호출
+      await axios.post(`${process.env.REACT_APP_API_SERVER}/api/member/delete`,
+        { password },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'X-XSRF-TOKEN': await fetchCsrfToken(),
+          },
+          withCredentials: true,
         }
+      );
+      setModalMessage('회원 탈퇴가 완료되었습니다.');
+      setIsModalOpen(true);
+      localStorage.removeItem('accessToken');
+      setTimeout(() => navigate('/'), 2000); // Redirect after 2 seconds
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      setModalMessage('비밀번호가 올바르지 않습니다.');
+      setIsModalOpen(true);
+    } finally {
+      setLoading(false);
     }
-};
-
+  };
 
   const fetchCsrfToken = async () => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_API_SERVER}/api/csrf-token`, {
-        withCredentials: true, // 쿠키 사용 설정
+        withCredentials: true,
       });
       return response.data.token;
     } catch (error) {
       console.error('Error fetching CSRF token:', error);
       return null;
     }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const closeConfirmation = () => {
+    setShowConfirmation(false);
   };
 
   const handleGoBack = () => {
@@ -259,6 +308,27 @@ const MemberDelete = () => {
             <span>로그아웃</span>
           </NavIcon>
         </BottomNavBar>
+
+        {/* Success/Error Modal */}
+        {isModalOpen && (
+          <ModalOverlay>
+            <ModalContent>
+              <p>{modalMessage}</p>
+              <ModalButton onClick={closeModal}>확인</ModalButton>
+            </ModalContent>
+          </ModalOverlay>
+        )}
+
+        {/* Confirmation Modal */}
+        {showConfirmation && (
+          <ModalOverlay>
+            <ModalContent>
+              <p>정말로 회원 탈퇴를 하시겠습니까?</p>
+              <ModalButton onClick={confirmDeleteAccount}>예</ModalButton>
+              <ModalButton onClick={closeConfirmation}>아니오</ModalButton>
+            </ModalContent>
+          </ModalOverlay>
+        )}
       </MainContent>
     </ScreenWrapper>
   );

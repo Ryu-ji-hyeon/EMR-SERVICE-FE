@@ -212,7 +212,7 @@ const StandardReservation = () => {
   const [patientId, setPatientId] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null); 
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const handleGoBack = () => {
     navigate('/standard-reservation');
   };
@@ -327,7 +327,6 @@ const StandardReservation = () => {
 
   const makeReservation = (date, time) => {
     const token = localStorage.getItem('accessToken');
-
     axios.post(`${process.env.REACT_APP_API_SERVER}/api/reservations/reserve`, null, {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -343,9 +342,8 @@ const StandardReservation = () => {
       withCredentials: true
     })
     .then((response) => {
-      alert('예약이 확정되었습니다.');
+      setIsConfirmationModalOpen(true); // Show the confirmation modal instead of alert
       setAvailableTimes(prevTimes => prevTimes.filter(t => t !== time));
-      navigate('/member/reservations');
     })
     .catch((error) => {
       console.error('Error making reservation:', error);
@@ -382,7 +380,19 @@ const StandardReservation = () => {
           </ModalOverlay>
         )}
 
-      {!isModalOpen && (
+{isConfirmationModalOpen && (
+          <ModalOverlay>
+            <ModalContent>
+              <p>예약이 확정되었습니다.</p>
+              <ModalButton onClick={() => {
+                setIsConfirmationModalOpen(false);
+                navigate('/member/reservations'); // Redirect after closing the modal
+              }}>확인</ModalButton>
+            </ModalContent>
+          </ModalOverlay>
+        )}
+
+      {!isConfirmationModalOpen &&!isModalOpen && (
                 <BottomNavBar>
                   <NavIcon onClick={() => navigate('/member/dashboard')}>
                     <FaHome />
